@@ -1,0 +1,7 @@
+.idea/
+.DS_Store
+*.pkl
+*.pth
+*.pyc
+*.neg
+*.pos
