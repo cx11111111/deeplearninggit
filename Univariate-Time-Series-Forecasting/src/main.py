@@ -2,7 +2,7 @@ from globals import *
 from utils.utils import *
 from utils.visualisation import show_evaluation
 
-from model import SeqForecast
+from model import *
 
 if __name__ == "__main__":
     #加载数据集
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     #训练模式
     if config.mode == "train":
         # Create new instance of the RNN
-        net = SeqForecast(input_dim=train_loader.dataset[0][0].shape[-1],
+        net = LSTMModel(input_dim=train_loader.dataset[0][0].shape[-1],
                           hidden_dim=config.hidden_dim,
                           num_layers=config.num_layers)
         net.to(device)
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         train_loop(net, config.epochs, config.lr, config.wd,train_loader, test_set, debug=True)
     else:
         # Create new instance of the RNN using default values
-        net = SeqForecast(input_dim=train_loader.dataset[0][0].shape[-1],
+        net = LSTMModel(input_dim=train_loader.dataset[0][0].shape[-1],
                           hidden_dim=parser.get_default('hidden_dim'),
                           num_layers=parser.get_default('num_layers'))
         net.to(device)

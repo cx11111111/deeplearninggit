@@ -78,7 +78,7 @@ def train_loop(net, epochs, lr, wd, train_loader, test_set, debug=True):
         with torch.no_grad():
             test_loss = evaluate(net, test_set, history)
 
-        if debug and (epoch + 1) % 200 == 0:
+        if debug and (epoch + 1) % 10 == 0:
             print(f"Epoch: {epoch+1} | Train Loss: {train_loss:.8f}",
                   f" |  Test Loss: {test_loss:.8f}")
 
@@ -145,12 +145,16 @@ def load_dataset(dataset_path, show_data=True):
     '''
     # Load the dataset as DataFrame
     dataset = pd.read_csv(dataset_path)
-    # 数据集包含日期以及每月汽车销售测量，因此我们仅提取销售列作为numpy数组
-    xlabels = dataset.iloc[:, 0].values
-    dataset = dataset.iloc[:, 1:].values
+    #xlabels = dataset.iloc[:, 2].values
+    dataset = dataset.iloc[:, 12:].values
 
     if show_data:
-        display_dataset(dataset, xlabels)
+        display_dataset(dataset)
+
+    #处理异常值
+    data=pd.DataFrame(dataset)
+    data = data.dropna()
+    dataset=data.values
 
     # 归一化
     scaler = MinMaxScaler()

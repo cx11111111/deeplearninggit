@@ -1,12 +1,12 @@
 import torch
-from torch.nn import L1Loss
+from torch.nn import MSELoss
 from argparse import ArgumentParser
 
 # Device on which we port the model and variables
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Loss function: L1loss (mean absolute error)
-loss_func = L1Loss()
+loss_func = MSELoss()
 
 parser = ArgumentParser()
 #训练模式或预测模式
@@ -17,7 +17,7 @@ parser.add_argument("--pretrained_path", type=str,
                     default="pretrained/car_sales.pt",
                     help="Location of the pretrained net")
 #数据集路径
-parser.add_argument("--dataset_path", type=str, default="data/monthly-car-sales.csv",
+parser.add_argument("--dataset_path", type=str, default="C:\\Users\\cx\\Desktop\\数据集\\data/firstturbdata.csv",
                     help="Location of the dataset file")
 #使用多少时间步长的数据来预测
 parser.add_argument("--lag", type=int, default=3,
@@ -26,14 +26,14 @@ parser.add_argument("--lag", type=int, default=3,
 parser.add_argument("--split_ratio", type=float, default=0.7,
                     help="Ratio for splitting the dataset into train-test subsets")
 #LSTM隐藏状态向量维度
-parser.add_argument("--hidden_dim", type=int, default=3,
+parser.add_argument("--hidden_dim", type=int, default=64,
                     help="Dimension of the LSTM hidden state vector")
 #LSTM的层数
-parser.add_argument("--num_layers", type=int, default=1,
+parser.add_argument("--num_layers", type=int, default=3,
                     help="Number of LSTM layers")
-parser.add_argument("--epochs", type=int, default=1000,
+parser.add_argument("--epochs", type=int, default=150,
                     help="Number of training epochs")
-parser.add_argument("--bs", type=int, default=52,
+parser.add_argument("--bs", type=int, default=64,
                     help="Batch size")
 parser.add_argument("--lr", type=float, default=5e-4,
                     help="Learning rate")
