@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # Prepare the dataset for training/testing
     subsequences = extract_subsequences(dataset, lag=config.lag)
     # Split the dataset into train/test set
-    train_loader, test_set = train_test_split(subsequences)
+    train_loader, valid_set, test_set = train_test_split(subsequences)
 
     #训练模式
     if config.mode == "train":

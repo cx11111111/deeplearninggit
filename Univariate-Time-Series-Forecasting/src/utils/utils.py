@@ -9,8 +9,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 
-def evaluate(net, test_set, history):
-    ''' 评估RNN在测试集上的性能
+def evaluate(net, valid_set, history):
+    ''' 评估RNN在验证集上的性能
     参数:
         net (nn.Module): RNN net
         test_set (dict): test input and target output
@@ -20,11 +20,11 @@ def evaluate(net, test_set, history):
     '''
     net.eval()
 
-    test_predict = net(test_set['X'])
-    test_loss = loss_func(test_predict, test_set['Y'])
-    history['test_loss'].append(test_loss.item())
+    val_predict = net(valid_set['X'])
+    val_loss = loss_func(val_predict, valid_set['Y'])
+    history['val_loss'].append(val_loss.item())
 
-    return test_loss.item()
+    return val_loss.item()
 
 
 def train(net, train_loader, optimizer, history):
@@ -54,7 +54,7 @@ def train(net, train_loader, optimizer, history):
     return loss.item()
 
 
-def train_loop(net, epochs, lr, wd, train_loader, test_set, debug=True):
+def train_loop(net, epochs, lr, wd, train_loader, valid_set, debug=True):
     ''' 使用Adam优化器执行RNN的训练.
         记录训练和评估损失.
     参数:
@@ -68,7 +68,7 @@ def train_loop(net, epochs, lr, wd, train_loader, test_set, debug=True):
     '''
     history = dict()
     history['train_loss'] = list()
-    history['test_loss'] = list()
+    history['val_loss'] = list()
 
     optimizer = optim.Adam(net.parameters(), lr=lr, weight_decay=wd)
 
@@ -76,11 +76,11 @@ def train_loop(net, epochs, lr, wd, train_loader, test_set, debug=True):
         train_loss = train(net, train_loader, optimizer, history)
 
         with torch.no_grad():
-            test_loss = evaluate(net, test_set, history)
+            val_loss = evaluate(net, valid_set, history)
 
         if debug and (epoch + 1) % 10 == 0:
             print(f"Epoch: {epoch+1} | Train Loss: {train_loss:.8f}",
-                  f" |  Test Loss: {test_loss:.8f}")
+                  f" |  Val Loss: {val_loss:.8f}")
 
     if debug:
         show_loss(history)
@@ -96,23 +96,31 @@ def train_test_split(subsequences):
     '''
     #训练集的长度
     TRAIN_SIZE = int(config.split_ratio * len(subsequences))
+    valid_size=int(config.split_ratio1*len(subsequences))
     train_seqs = subsequences[:TRAIN_SIZE]
-    test_seqs = subsequences[TRAIN_SIZE:]
+    valid_seqs=subsequences[TRAIN_SIZE:valid_size]
+    test_seqs = subsequences[valid_size:]
 
     # Divide inputs and target outputs
     trainX, trainY = [torch.Tensor(list(x)).to(device)
                       for x in zip(*train_seqs)]
+    validX,validY=[torch.Tensor(list(x)).to(device)
+                   for x in zip(*valid_seqs)]
     testX, testY = [torch.Tensor(list(x)).to(device)
                     for x in zip(*test_seqs)]
 
     train_set = torch.utils.data.TensorDataset(trainX, trainY)
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=config.bs)
 
+    valid_set = dict()
+    valid_set['X'] = torch.Tensor(validX).to(device)
+    valid_set['Y'] = torch.Tensor(validY).to(device)
+
     test_set = dict()
     test_set['X'] = torch.Tensor(testX).to(device)
     test_set['Y'] = torch.Tensor(testY).to(device)
 
-    return train_loader, test_set
+    return train_loader, valid_set, test_set
 
 
 def extract_subsequences(sequence, lag=3):

@@ -18,7 +18,7 @@ def show_evaluation(net, dataset, scaler, debug=True):
         debug (bool): should we calculate/display eval.MSE/MAE
     '''
     dataset = torch.FloatTensor(dataset).unsqueeze(-1).to(device)
-    total_train_size = int(config.split_ratio * len(dataset))
+    total_train_size = int(config.split_ratio1 * len(dataset))
     test_set=dataset[total_train_size:]
 
     # 预测测试集
@@ -33,7 +33,7 @@ def show_evaluation(net, dataset, scaler, debug=True):
     plt.plot(test_set,label='real')
     plt.plot(test_predict,label='predict')
     plt.ylabel("Patv")
-    plt.title('Univariate Time-Series Forecast')
+    plt.title('Forecast and Real')
     plt.legend()
     plt.show()
 
@@ -60,8 +60,8 @@ def show_loss(history):
         history(dict): Contains train and test loss logs
     '''
     plt.plot(history['train_loss'], label='Train loss')
-    plt.plot(history['test_loss'], label='Evaluation loss')
-    plt.title('Loss曲线')
+    plt.plot(history['val_loss'], label='Val loss')
+    plt.title('Loss Curve')
     plt.xlabel('Epoch')
     plt.ylabel('loss')
     plt.legend()
@@ -90,7 +90,7 @@ def display_dataset(dataset):
 
     # Display loaded data
     plt.plot(dataset)
-    plt.title('turbdata')
+    plt.title('TurbData')
     plt.ylabel("Patv")
     #plt.xticks(tick_positions, x_ticks, size='small')
     plt.legend()

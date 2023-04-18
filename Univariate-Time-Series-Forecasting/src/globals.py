@@ -24,7 +24,10 @@ parser.add_argument("--lag", type=int, default=3,
                     help="Time lag used for preparing train and test X-Y pairs")
 #训练集和测试集比例
 parser.add_argument("--split_ratio", type=float, default=0.7,
-                    help="Ratio for splitting the dataset into train-test subsets")
+                    help="Ratio for splitting the dataset into train-valid test subsets")
+#训练集和测试集比例
+parser.add_argument("--split_ratio1", type=float, default=0.85,
+                    help="Ratio for splitting the dataset into valid-test subsets")
 #LSTM隐藏状态向量维度
 parser.add_argument("--hidden_dim", type=int, default=64,
                     help="Dimension of the LSTM hidden state vector")
