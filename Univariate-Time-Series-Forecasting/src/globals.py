@@ -17,16 +17,16 @@ parser.add_argument("--pretrained_path", type=str,
                     default="pretrained/car_sales.pt",
                     help="Location of the pretrained net")
 #数据集路径
-parser.add_argument("--dataset_path", type=str, default="C:\\Users\\cx\\Desktop\\数据集\\data/firstturbdata.csv",
+parser.add_argument("--dataset_path", type=str, default="C:\\Users\\cx\\Desktop\\数据集\\wtbdata_245days.csv",
                     help="Location of the dataset file")
 #使用多少时间步长的数据来预测
-parser.add_argument("--lag", type=int, default=3,
+parser.add_argument("--lag", type=int, default=144,
                     help="Time lag used for preparing train and test X-Y pairs")
 #训练集和测试集比例
-parser.add_argument("--split_ratio", type=float, default=0.7,
+parser.add_argument("--split_ratio", type=float, default=0.6,
                     help="Ratio for splitting the dataset into train-valid test subsets")
 #训练集和测试集比例
-parser.add_argument("--split_ratio1", type=float, default=0.85,
+parser.add_argument("--split_ratio1", type=float, default=0.8,
                     help="Ratio for splitting the dataset into valid-test subsets")
 #LSTM隐藏状态向量维度
 parser.add_argument("--hidden_dim", type=int, default=64,
@@ -34,7 +34,7 @@ parser.add_argument("--hidden_dim", type=int, default=64,
 #LSTM的层数
 parser.add_argument("--num_layers", type=int, default=3,
                     help="Number of LSTM layers")
-parser.add_argument("--epochs", type=int, default=150,
+parser.add_argument("--epochs", type=int, default=50,
                     help="Number of training epochs")
 parser.add_argument("--bs", type=int, default=64,
                     help="Batch size")

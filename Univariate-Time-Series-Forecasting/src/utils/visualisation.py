@@ -1,15 +1,21 @@
+import math
+import os.path
+
 from globals import *
 
 import torch
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score
 
 
 x_ticks = list()
 tick_positions = list()
 
 
-def show_evaluation(net, dataset, scaler, debug=True):
+def show_evaluation(net,test_set,scaler,i,test_MSE,test_RMSE,test_MAE,test_R2,debug=True):
     ''' 评估 RNN 在测试集上的性能，并显示预测值和目标值.
     参数:
         net (nn.Module): RNN to evaluate
@@ -17,43 +23,45 @@ def show_evaluation(net, dataset, scaler, debug=True):
         scaler (MinMaxScaler): 反归一化
         debug (bool): should we calculate/display eval.MSE/MAE
     '''
-    dataset = torch.FloatTensor(dataset).unsqueeze(-1).to(device)
-    total_train_size = int(config.split_ratio1 * len(dataset))
-    test_set=dataset[total_train_size:]
-
-    # 预测测试集
+    #预测测试数据集
     net.eval()
-    test_predict = net(test_set)
+    test_predict = net(test_set['X'])
 
     # 对实际值和预测值反归一化
     test_predict = scaler.inverse_transform(test_predict.cpu().data.numpy())
-    test_set = scaler.inverse_transform(test_set.cpu().squeeze(-1).data.numpy())
+    test_set['Y'] = scaler.inverse_transform(test_set['Y'].cpu().squeeze(-1).data.numpy().reshape(-1,1))
 
     # 绘制原始序列与预测序列
-    plt.plot(test_set,label='real')
+    plt.plot(test_set['Y'],label='real')
     plt.plot(test_predict,label='predict')
     plt.ylabel("Patv")
     plt.title('Forecast and Real')
     plt.legend()
-    plt.show()
+    save_dir_path='C:/Users/cx/Desktop/images/predict/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images/predict/Turb{}predict.png'.format(i + 1))
+    plt.clf()
+    #plt.show()
 
     if debug:
-        # 计算整个数据集的MSE、MAE
-        #total_mse = (np.square(test_predict - dataset)).mean()
-        #total_mae = (np.abs(test_predict - dataset)).mean()
-        #计算训练集的MSE、MAE
-        #train_mse = (np.square(test_predict - dataset))[:total_train_size].mean()
-        #train_mae = (np.abs(test_predict - dataset))[:total_train_size].mean()
         #计算测试集的MSE、MAE
-        test_mse = (np.square(test_predict - test_set)).mean()
-        test_mae = (np.abs(test_predict - test_set)).mean()
+        test_mse = mean_squared_error(test_predict, test_set['Y'])
+        test_rmse = math.sqrt(test_mse)
+        test_mae = mean_absolute_error(test_predict, test_set['Y'])
+        test_r2 = r2_score(test_predict, test_set['Y'])
 
-        #print(f"Total MSE:  {total_mse:.4f}  |  Total MAE:  {total_mae:.4f}")
-        #print(f"Train MSE:  {train_mse:.4f}  |  Train MAE:  {train_mae:.4f}")
-        print(f"Test MSE:   {test_mse:.4f}  |  Test MAE:   {test_mae:.4f}")
+        print(f"Test MSE: {test_mse:.4f} | Test RMSE: {test_rmse:.4f} | Test MAE: {test_mae:.4f} | Test R2: {test_r2:.4f}")
+
+        test_MSE.append(test_mse)
+        test_RMSE.append(test_rmse)
+        test_MAE.append(test_mae)
+        test_R2.append(test_r2)
+    return test_MSE,test_RMSE,test_MAE,test_R2
 
 
-def show_loss(history):
+
+def show_loss(history,i):
     ''' Display train and evaluation loss
 
     Arguments:
@@ -65,10 +73,15 @@ def show_loss(history):
     plt.xlabel('Epoch')
     plt.ylabel('loss')
     plt.legend()
-    plt.show()
+    save_dir_path = 'C:/Users/cx/Desktop/images/loss/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images/loss/Turb{}loss.png'.format(i + 1))
+    plt.clf()
+    #plt.show()
 
 
-def display_dataset(dataset):
+def display_dataset(dataset,i):
     ''' Displays the loaded data
 
     Arguments:
@@ -90,8 +103,43 @@ def display_dataset(dataset):
 
     # Display loaded data
     plt.plot(dataset)
-    plt.title('TurbData')
+    plt.title(f'Turb[{i+1}]Data')
     plt.ylabel("Patv")
     #plt.xticks(tick_positions, x_ticks, size='small')
     plt.legend()
-    plt.show()
+    #plt.show()
+    save_dir_path = 'C:/Users/cx/Desktop/images/all data/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images/all data/Turb{}all.png'.format(i+1))
+    plt.clf()
+
+
+    #时间序列分解
+    decomp=seasonal_decompose(dataset,model='additive',period=1008)
+    trend=decomp.trend
+    seasonal=decomp.seasonal
+    residual=decomp.resid
+
+    #绘制分解图
+    plt.subplot(411)
+    plt.plot(dataset,label='Original')
+    plt.legend()
+
+    plt.subplot(412)
+    plt.plot(trend,label='Trend')
+    plt.legend()
+
+    plt.subplot(413)
+    plt.plot(seasonal,label='Seasonality')
+    plt.legend()
+
+    plt.subplot(414)
+    plt.plot(residual,label='Residuals')
+    plt.legend()
+    save_dir_path = 'C:/Users/cx/Desktop/images/decompose/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images/decompose/Turb{}decompose.png'.format(i + 1))
+    plt.clf()
+    #plt.show()

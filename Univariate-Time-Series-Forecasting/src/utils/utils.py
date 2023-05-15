@@ -54,7 +54,7 @@ def train(net, train_loader, optimizer, history):
     return loss.item()
 
 
-def train_loop(net, epochs, lr, wd, train_loader, valid_set, debug=True):
+def train_loop(net, epochs, lr, wd, train_loader, valid_set, i,debug=True):
     ''' 使用Adam优化器执行RNN的训练.
         记录训练和评估损失.
     参数:
@@ -83,7 +83,7 @@ def train_loop(net, epochs, lr, wd, train_loader, valid_set, debug=True):
                   f" |  Val Loss: {val_loss:.8f}")
 
     if debug:
-        show_loss(history)
+        show_loss(history,i)
 
 
 def train_test_split(subsequences):
@@ -95,11 +95,11 @@ def train_test_split(subsequences):
         test_set (dict): test set inputs and target outputs
     '''
     #训练集的长度
-    TRAIN_SIZE = int(config.split_ratio * len(subsequences))
-    valid_size=int(config.split_ratio1*len(subsequences))
-    train_seqs = subsequences[:TRAIN_SIZE]
-    valid_seqs=subsequences[TRAIN_SIZE:valid_size]
-    test_seqs = subsequences[valid_size:]
+    TRAIN_SIZE = int((1-config.split_ratio) * len(subsequences))
+    valid_size=int((1-config.split_ratio1)*len(subsequences))
+    train_seqs = subsequences[TRAIN_SIZE:]
+    valid_seqs=subsequences[valid_size:TRAIN_SIZE]
+    test_seqs = subsequences[:valid_size]
 
     # Divide inputs and target outputs
     trainX, trainY = [torch.Tensor(list(x)).to(device)
@@ -123,16 +123,16 @@ def train_test_split(subsequences):
     return train_loader, valid_set, test_set
 
 
-def extract_subsequences(sequence, lag=3):
+def extract_subsequences(sequence, lag):
     ''' 划分输入数据和目标值
     参数:
         sequence(numpy.ndarray): 整个数据集
         lag(int): number of previous values we use as input
+        pred(int):the length we use as the forecast
     返回:
         subseqs(list): 输入输出对列表
     '''
-    subseqs = list()
-
+    subseqs=list()
     for i in range(len(sequence) - lag - 1):
         input = sequence[i:i + lag]
         output = sequence[i + lag]
@@ -142,7 +142,7 @@ def extract_subsequences(sequence, lag=3):
     return subseqs
 
 
-def load_dataset(dataset_path, show_data=True):
+def load_dataset(dataset_path,i, show_data=True):
     ''' 加载数据集.
     参数:
         dataset_path(string): path to the dataset file
@@ -153,16 +153,23 @@ def load_dataset(dataset_path, show_data=True):
     '''
     # Load the dataset as DataFrame
     dataset = pd.read_csv(dataset_path)
+    #print(dataset)
+    columns=["TurbID","Patv"]
+    dataset=dataset[columns]
+    # 处理异常值
+    dataset = dataset.dropna()
+    groups=dataset.groupby('TurbID')
+    dataframe=[]
+    for name,group in groups:
+        group=group.reset_index(drop=True)
+        dataframe.append(group)
+    #print(dataframe)
+
     #xlabels = dataset.iloc[:, 2].values
-    dataset = dataset.iloc[:, 12:].values
+    dataset = dataframe[i].iloc[:, 1:].values
 
     if show_data:
-        display_dataset(dataset)
-
-    #处理异常值
-    data=pd.DataFrame(dataset)
-    data = data.dropna()
-    dataset=data.values
+        display_dataset(dataset,i)
 
     # 归一化
     scaler = MinMaxScaler()
