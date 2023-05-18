@@ -20,7 +20,7 @@ parser.add_argument("--pretrained_path", type=str,
 parser.add_argument("--dataset_path", type=str, default="C:\\Users\\cx\\Desktop\\数据集\\wtbdata_245days.csv",
                     help="Location of the dataset file")
 #使用多少时间步长的数据来预测
-parser.add_argument("--lag", type=int, default=144,
+parser.add_argument("--lag", type=int, default=1,
                     help="Time lag used for preparing train and test X-Y pairs")
 #训练集和测试集比例
 parser.add_argument("--split_ratio", type=float, default=0.6,
