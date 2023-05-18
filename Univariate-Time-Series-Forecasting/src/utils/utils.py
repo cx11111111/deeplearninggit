@@ -95,11 +95,11 @@ def train_test_split(subsequences):
         test_set (dict): test set inputs and target outputs
     '''
     #训练集的长度
-    TRAIN_SIZE = int((1-config.split_ratio) * len(subsequences))
-    valid_size=int((1-config.split_ratio1)*len(subsequences))
-    train_seqs = subsequences[TRAIN_SIZE:]
-    valid_seqs=subsequences[valid_size:TRAIN_SIZE]
-    test_seqs = subsequences[:valid_size]
+    TRAIN_SIZE = int(config.split_ratio * len(subsequences))
+    valid_size=int(config.split_ratio1*len(subsequences))
+    train_seqs = subsequences[:TRAIN_SIZE]
+    valid_seqs=subsequences[TRAIN_SIZE:valid_size]
+    test_seqs = subsequences[valid_size:]
 
     # Divide inputs and target outputs
     trainX, trainY = [torch.Tensor(list(x)).to(device)

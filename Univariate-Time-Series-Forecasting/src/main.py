@@ -43,4 +43,4 @@ if __name__ == "__main__":
 
         'Test R2':test_R2
     })
-    df.to_csv('C:/Users/cx/Desktop/zhibiao(1).csv',index=False)
+    df.to_csv('C:/Users/cx/Desktop/zhibiao(144).csv',index=False)
