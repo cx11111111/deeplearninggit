@@ -1,15 +1,13 @@
+import math
+import os.path
 from globals import *
 
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score
 
-
-x_ticks = list()
-tick_positions = list()
-
-
-def show_evaluation(net, dataset, target, scaler, debug=True):
+def show_evaluation(net, subsequences, scaler,i,test_MSE,test_RMSE,test_MAE,test_R2,debug=True):
     ''' Evaluates performance of the RNN on the entire
         dataset, and shows the prediction as well as
         target values.
@@ -24,65 +22,73 @@ def show_evaluation(net, dataset, target, scaler, debug=True):
                       MSE/MAE
     '''
     net.eval()
-    TRAIN_SPLIT = int(config.train_ratio*len(target))
-    VAL_SPLIT = TRAIN_SPLIT + int(config.val_ratio*len(target))
-
-    COL_NUM = int((dataset.shape[-1] - 1)/config.lag)
-
-    # Adapt the entire dataset for the PyTorch LSTM
-    total_set = torch.Tensor(dataset[:,:-1]).view(-1, config.lag, COL_NUM).to(device)
+    TRAIN_SPLIT=int(config.train_ratio*len(subsequences))
+    VAL_SPLIT=TRAIN_SPLIT+int(config.val_ratio*len(subsequences))
+    COL_NUM=int((subsequences.shape[-1]-1)/config.lag)
     # Prediction on the entire dataset
-    prediction = net(total_set).unsqueeze(-1).cpu().data.numpy()
+    test_set=torch.Tensor(subsequences[VAL_SPLIT:,:-1]).view(-1,config.lag,COL_NUM).to(device)
+    prediction = net(test_set).unsqueeze(-1).cpu().data.numpy()
+    scaling_temp=np.concatenate([subsequences[VAL_SPLIT:,-10:-1],prediction],axis=1)
+    prediction = scaler.inverse_transform(scaling_temp)
+    prediction=prediction[:,-1]
 
-    scaling_temp = np.concatenate([prediction, dataset[:, -8:-1]], axis=1)
-    prediction = scaler.inverse_transform(scaling_temp)[:, 0]
+    test_real = torch.Tensor(subsequences[VAL_SPLIT:,-1]).to(device)
+    test_real=test_real.cpu().data.numpy().reshape(-1,1)
+    scaling_temp1 = np.concatenate([subsequences[VAL_SPLIT:, -10:-1],test_real], axis=1)
+    test_real = scaler.inverse_transform(scaling_temp1)[:,-1]
 
     # Plotting the original sequence vs. predicted
-    plt.figure(figsize=(8,5))
-    plt.plot(range(0, len(target)), target)
-    plt.plot(range(config.lag, len(target)), prediction)
-    plt.xticks(tick_positions, x_ticks, size='small')
-    plt.axvline(x=TRAIN_SPLIT, c='g', linestyle='-')
-    plt.axvline(x=VAL_SPLIT, c='r', linestyle='-')
+    plt.figure(figsize=(20, 10))
+    plt.plot(test_real,label='real')
+    plt.plot(prediction,label='predict')
     plt.title('Multivariate Time-Series Forecast')
-    plt.xlabel('Year-Month-Day')
-    plt.ylabel("Level of pollution ( pm2.5 )")
-    plt.legend(['Ground truth', 'Prediction', 'Train-Val split', 'Test split'])
-    plt.show()
+    plt.ylabel("Patv")
+    plt.legend()
+    save_dir_path = 'C:/Users/cx/Desktop/images1/predict/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images1/predict/Turb{}predict.png'.format(i + 1))
+    plt.clf()
+    #plt.show()
 
     if debug:
-        # Calculating total MSE & MAE
-        train_mse = (np.square(prediction[:TRAIN_SPLIT] - target[:TRAIN_SPLIT])).mean()
-        train_mae = (np.abs(prediction[:TRAIN_SPLIT] - target[:TRAIN_SPLIT])).mean()
-        # Calculating train MSE & MAE
-        val_mse = (np.square(prediction[TRAIN_SPLIT:VAL_SPLIT] - target[TRAIN_SPLIT:VAL_SPLIT])).mean()
-        val_mae = (np.abs(prediction[TRAIN_SPLIT:VAL_SPLIT] - target[TRAIN_SPLIT:VAL_SPLIT])).mean()
         # Calculating test MSE & MAE
-        test_mse = (np.square(prediction[VAL_SPLIT:] - target[VAL_SPLIT+config.lag:])).mean()
-        test_mae = (np.abs(prediction[VAL_SPLIT:] - target[VAL_SPLIT+config.lag:])).mean()
+        test_mse = mean_squared_error(prediction, test_real)
+        test_rmse=math.sqrt(test_mse)
+        test_mae = mean_absolute_error(prediction, test_real)
+        test_r2=r2_score(prediction,test_real)
 
-        print(f"Train MSE:  {train_mse:.4f}  |  Train MAE:  {train_mae:.4f}")
-        print(f"Val MSE:  {val_mse:.4f}  |  Val MAE:  {val_mae:.4f}")
-        print(f"Test MSE:  {test_mse:.4f}   |  Test MAE:  {test_mae:.4f}")
+        print(f"Test MSE: {test_mse:.4f} | Test RMSE: {test_rmse:.4f} | Test MAE: {test_mae:.4f} | Test R2: {test_r2:.4f}")
+        test_MSE.append(test_mse)
+        test_RMSE.append(test_rmse)
+        test_MAE.append(test_mae)
+        test_R2.append(test_r2)
+    return test_MSE, test_RMSE, test_MAE, test_R2
 
 
-def show_loss(history):
+
+def show_loss(history,i):
     ''' Display train and evaluation loss
 
     Arguments:
         history(dict): Contains train and test loss logs
     '''
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(20, 10))
     plt.plot(history['train_loss'], label='Train loss')
-    plt.plot(history['test_loss'], label='Evaluation loss')
-
-    plt.title('Mean Absolute Error')
+    plt.plot(history['val_loss'], label='Val loss')
+    plt.title('Loss Curve')
     plt.xlabel('Epoch')
-    plt.ylabel('MAE')
+    plt.ylabel('MSELoss')
     plt.legend()
+    save_dir_path = 'C:/Users/cx/Desktop/images1/loss/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images1/loss/Turb{}loss.png'.format(i + 1))
+    plt.clf()
+    #plt.show()
 
 
-def display_dataset(dataset, xlabels):
+def display_dataset(dataset,i):
     ''' Displays the loaded data
 
     Arguments:
@@ -90,30 +96,36 @@ def display_dataset(dataset, xlabels):
         xlabels(numpy.ndarray): strings representing
                                  according dates
     '''
-    global x_ticks
-    global tick_positions
+    #global x_ticks
+    #global tick_positions
 
     # Remove information about hours (only for plotting purposes)
-    xlabels = [x[:10] for x in xlabels]
+    #xlabels = [x[:10] for x in xlabels]
     # We can't show every date in the dataset
     # on the x axis because we couldn't see
     # any label clearly. So we extract every
     # n-th label/tick
-    segment = int(len(dataset) / 6)
+    #segment = int(len(dataset) / 6)
 
-    for i, date in enumerate(xlabels):
-        if i > 0 and (i + 1) % segment == 0:
-            x_ticks.append(date)
-            tick_positions.append(i)
-        elif i == 0:
-            x_ticks.append(date)
-            tick_positions.append(i)
+    #for i, date in enumerate(xlabels):
+        #if i > 0 and (i + 1) % segment == 0:
+            #x_ticks.append(date)
+            #tick_positions.append(i)
+        #elif i == 0:
+            #x_ticks.append(date)
+            #tick_positions.append(i)
 
     # Display loaded data
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(20, 10))
     plt.plot(dataset)
-    plt.title('Pollution in Beijing')
-    plt.xlabel('Year-Month-Day')
-    plt.ylabel("Level of pollution ( pm2.5 )")
-    plt.xticks(tick_positions, x_ticks, size='small')
-    plt.show()
+    plt.title(f'Turb[{i+1}]Data')
+    #plt.xlabel('Time')
+    plt.ylabel("Patv")
+    #plt.xticks(tick_positions, x_ticks, size='small')
+    plt.legend()
+    save_dir_path = 'C:/Users/cx/Desktop/images1/all data/'
+    if not os.path.exists(save_dir_path):
+        os.makedirs(save_dir_path)
+    plt.savefig('C:/Users/cx/Desktop/images1/all data/Turb{}all.png'.format(i + 1))
+    plt.clf()
+    #plt.show()

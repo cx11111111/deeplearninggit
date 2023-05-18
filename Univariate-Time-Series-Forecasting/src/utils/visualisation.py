@@ -32,6 +32,7 @@ def show_evaluation(net,test_set,scaler,i,test_MSE,test_RMSE,test_MAE,test_R2,de
     test_set['Y'] = scaler.inverse_transform(test_set['Y'].cpu().squeeze(-1).data.numpy().reshape(-1,1))
 
     # 绘制原始序列与预测序列
+    plt.figure(figsize=(20,10))
     plt.plot(test_set['Y'],label='real')
     plt.plot(test_predict,label='predict')
     plt.ylabel("Patv")
@@ -67,6 +68,7 @@ def show_loss(history,i):
     Arguments:
         history(dict): Contains train and test loss logs
     '''
+    plt.figure(figsize=(20, 10))
     plt.plot(history['train_loss'], label='Train loss')
     plt.plot(history['val_loss'], label='Val loss')
     plt.title('Loss Curve')
@@ -102,6 +104,7 @@ def display_dataset(dataset,i):
             #tick_positions.append(i)
 
     # Display loaded data
+    plt.figure(figsize=(20, 10))
     plt.plot(dataset)
     plt.title(f'Turb[{i+1}]Data')
     plt.ylabel("Patv")
@@ -122,6 +125,7 @@ def display_dataset(dataset,i):
     residual=decomp.resid
 
     #绘制分解图
+    plt.figure(figsize=(20, 10))
     plt.subplot(411)
     plt.plot(dataset,label='Original')
     plt.legend()

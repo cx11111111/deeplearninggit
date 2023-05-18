@@ -51,7 +51,7 @@ def train(net, train_loader, optimizer, history):
         total_num += len(target)
     history['train_loss'].append(train_loss / total_num)
 
-    return loss.item()
+    return train_loss / total_num
 
 
 def train_loop(net, epochs, lr, wd, train_loader, valid_set, i,debug=True):
@@ -156,6 +156,9 @@ def load_dataset(dataset_path,i, show_data=True):
     #print(dataset)
     columns=["TurbID","Patv"]
     dataset=dataset[columns]
+    target_col='Patv'
+    dataset = dataset[dataset[target_col] != 0]
+    dataset = dataset[dataset[target_col] != -0.3]
     # 处理异常值
     dataset = dataset.dropna()
     groups=dataset.groupby('TurbID')

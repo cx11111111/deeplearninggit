@@ -26,7 +26,7 @@ def evaluate(net, val_set, history):
 
     val_predict = net(val_set['X'])
     val_loss = loss_func(val_predict, val_set['Y'])
-    history['val_loss'].append(val_loss)
+    history['val_loss'].append(val_loss.item())
 
     return val_loss.item()
 
@@ -44,7 +44,7 @@ def train(net, train_loader, optimizer, history):
     Returns:
         test_loss (float): loss on the test set
     '''
-    net.eval()
+    net.train()
 
     total_num = 0
     train_loss = 0
@@ -59,10 +59,10 @@ def train(net, train_loader, optimizer, history):
 
     history['train_loss'].append(train_loss / total_num)
 
-    return loss.item()
+    return train_loss / total_num
 
 
-def train_loop(net, epochs, lr, wd, train_loader, val_set, debug=True):
+def train_loop(net, epochs, lr, wd, train_loader, val_set,i, debug=True):
     ''' Performs the training of the RNN using Adam optimizer.
         Train and evaluation losses are being logged.
 
@@ -92,13 +92,11 @@ def train_loop(net, epochs, lr, wd, train_loader, val_set, debug=True):
                   f" |  Validation Loss: {val_loss:.8f}")
 
     if debug:
-        show_loss(history)
+        show_loss(history,i)
 
 
 def train_val_test_split(subsequences):
-    ''' Splits the loaded subsequences into train, validation
-        and test set w.r.t. split ratio.s
-
+    ''' Splits the loaded subsequences into train, validation and test set w.r.t. split ratio.s
     Arguments:
         subsequences (numpy.ndarray): input-output pairs
     Returns:
@@ -143,7 +141,7 @@ def train_val_test_split(subsequences):
     return train_loader, val_set, test_set
 
 
-def extract_subsequences(sequence, cols, lag=3):
+def extract_subsequences(sequence, cols, lag):
     ''' Extracts subsequences in order to create
         input - output pairs for the train / test data.
         We extract input subsequences of lag length
@@ -166,34 +164,26 @@ def extract_subsequences(sequence, cols, lag=3):
     for i in range(lag, 0, -1):
         # Get the time lagged features: Features(t-i)
         lagged_features.append(dataset.shift(i))
+    #print("1:{}".format(lagged_features))
 
     # Remember the original sequence (which we are trying to predict)
-    lagged_features.append(dataset['pm2.5'])
+    lagged_features.append(dataset['Patv'])
+    #print("2:{}".format(lagged_features))
 
-    # Create new dataframe which constis of lagged features 
-    # and target sequence
+    # Create new dataframe which constis of lagged features and target sequence
     subseqs = pd.concat(lagged_features, axis=1)
-    # When shifting rows, missing values get NA assigned
-    # so we remove rows which contain NA values
+    #print("3:{}".format(subseqs))
+
+    # When shifting rows, missing values get NA assigned so we remove rows which contain NA values
     subseqs.dropna(inplace=True)
+
+    #print(subseqs)
+    print(subseqs.shape)
 
     return subseqs.values
 
 
-def parse_dates(date):
-    ''' Converts columns extracted from the
-        original dataset into datetime format.
-
-    Arguments:
-        date (list): [year, month, day, hour]
-    Returns:
-        date (datetime object): formatted date    
-    '''
-    date = datetime.strptime(date, '%Y %m %d %H')
-    return date
-
-
-def load_dataset(dataset_path, show_data=True):
+def load_dataset(dataset_path, i,show_data=True):
     ''' Loads the dataset stored as the csv file.
         Displays the loaded data if desired.
 
@@ -207,36 +197,41 @@ def load_dataset(dataset_path, show_data=True):
     '''
     # Column which contains the values which we are trying
     # to predict
-    TARGET_COL = 'pm2.5'
+    TARGET_COL = 'Patv'
 
     # Load the dataset as DataFrame
-    dataset = pd.read_csv(config.dataset_path,
-                            parse_dates = {"Date": \
-                            ['year', 'month', 'day', 'hour']}, 
-                            index_col='Date',
-                            date_parser=parse_dates)
+    dataset = pd.read_csv(dataset_path)
+    dataset=dataset[dataset[TARGET_COL]!=0]
+    dataset = dataset[dataset[TARGET_COL] != -0.3]
     dataset.dropna(inplace=True)
-    # 'CBWD' is a categorical feature so we use Label Encoder to
-    # to translate categorical values (strings) to values: 1..n
-    dataset['cbwd'] = LabelEncoder().fit_transform(dataset['cbwd'])
+    groups = dataset.groupby('TurbID')
+    dataframe = []
+    for name, group in groups:
+        group = group.reset_index(drop=True)
+        dataframe.append(group)
+    dataset=dataframe[i]
     # 'No' is not a necessary feature
-    dataset.drop(columns=['No'], inplace=True)
+    dataset.drop(columns=['TurbID'], inplace=True)
+    dataset.drop(columns=['Day'], inplace=True)
+    dataset.drop(columns=['Tmstamp'], inplace=True)
+    corr_matrix = dataset.corr()
+    print(corr_matrix)
 
     # Extract column names
     cols = list(dataset.columns)
     # Extract target values (used for plotting later)
     target = dataset[TARGET_COL].values
     if show_data:
-        display_dataset(target, dataset.index.values.astype('str'))
+        display_dataset(target,i)
 
     # We normalize the dataset values
     scaler = MinMaxScaler()
-    scaled = scaler.fit_transform(dataset.values)
+    scaled = scaler.fit_transform(dataset)
     
     data = dict()
     data['original'] = dataset
     data['scaled'] = scaled
     data['column_names'] = cols
     data['target'] = target
-
+    #print(data)
     return data, scaler
