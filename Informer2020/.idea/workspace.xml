@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a88a6230-63e6-4370-a2a1-c9cd55b49218" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/../Autoformer" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Spatiotemporal_UQ" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../transformer" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/NeurIPS2023-One-Fits-All" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/PISA" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/lag-llama" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/llm.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llm/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/llmtime" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/timegpt.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/main.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 4
+}]]></component>
+  <component name="ProjectId" id="2b4hLtLPsNymg5FNTWGNgow6pZj" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/22279/deeplearninggit/Informer2020"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="a88a6230-63e6-4370-a2a1-c9cd55b49218" name="更改" comment="" />
+      <created>1705480205572</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1705480205572</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main_informer.py</url>
+          <line>103</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
