@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from tensorflow import keras
-from tensorflow.keras import layers
+from tensorflow.python.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 
 #读入数据

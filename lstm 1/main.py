@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader,TensorDataset
 
-data=pd.read_csv(r"C:\Users\cx\Desktop\数据集\data\firstturbdata.csv",usecols=[12])
+data=pd.read_csv(r"C:\Users\22279\Desktop\数据集\wind_dataset.csv",usecols=[1])
 plt.plot(data)
 plt.show()
 #数据预处理
