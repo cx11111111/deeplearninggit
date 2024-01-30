@@ -26,6 +26,7 @@ data = data[data['Patv'] >= 0]
 print(data)
 timeseries = data['Patv'].dropna() # Dropping NaN values
 timeseries=timeseries.diff().dropna()
+print(timeseries)
 
 adf_test_result=adfuller(timeseries)
 adf_p_value=adf_test_result[1]

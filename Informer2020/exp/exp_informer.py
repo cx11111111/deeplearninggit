@@ -1,3 +1,5 @@
+import pandas as pd
+
 from data.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred
 from exp.exp_basic import Exp_Basic
 from models.model import Informer, InformerStack
@@ -6,9 +8,11 @@ from utils.tools import EarlyStopping, adjust_learning_rate
 from utils.metrics import metric
 
 import numpy as np
+from utils.tools import StandardScaler
 
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 from torch import optim
 from torch.utils.data import DataLoader
 
@@ -69,6 +73,7 @@ class Exp_Informer(Exp_Basic):
             'ECL':Dataset_Custom,
             'Solar':Dataset_Custom,
             'custom':Dataset_Custom,
+            'turb_23':Dataset_Custom,
         }
         Data = data_dict[self.args.data]
         timeenc = 0 if args.embed!='timeF' else 1
@@ -122,7 +127,7 @@ class Exp_Informer(Exp_Basic):
         self.model.train()
         return total_loss
 
-    def train(self, setting):
+    def train(self, setting, do_predict):
         train_data, train_loader = self._get_data(flag = 'train')
         vali_data, vali_loader = self._get_data(flag = 'val')
         test_data, test_loader = self._get_data(flag = 'test')
@@ -142,6 +147,9 @@ class Exp_Informer(Exp_Basic):
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
 
+        train_losses=[]
+        val_losses=[]
+
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
@@ -157,13 +165,13 @@ class Exp_Informer(Exp_Basic):
                 loss = criterion(pred, true)
                 train_loss.append(loss.item())
                 
-                if (i+1) % 100==0:
-                    print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
-                    speed = (time.time()-time_now)/iter_count
-                    left_time = speed*((self.args.train_epochs - epoch)*train_steps - i)
-                    print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
-                    iter_count = 0
-                    time_now = time.time()
+                # if (i+1) % 100==0:
+                #     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
+                #     speed = (time.time()-time_now)/iter_count
+                #     left_time = speed*((self.args.train_epochs - epoch)*train_steps - i)
+                #     print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
+                #     iter_count = 0
+                #     time_now = time.time()
                 
                 if self.args.use_amp:
                     scaler.scale(loss).backward()
@@ -176,24 +184,39 @@ class Exp_Informer(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch+1, time.time()-epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
-            test_loss = self.vali(test_data, test_loader, criterion)
+            #test_loss = self.vali(test_data, test_loader, criterion)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
+                epoch + 1, train_steps, train_loss, vali_loss))
+            train_losses.append(train_loss)
+            val_losses.append(vali_loss)
+
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
 
             adjust_learning_rate(model_optim, epoch+1, self.args)
-            
-        best_model_path = path+'/'+'checkpoint.pth'
-        self.model.load_state_dict(torch.load(best_model_path))
+
+        #可视化
+        plt.figure()
+        plt.plot(train_losses,label='Training Loss')
+        plt.plot(val_losses,label='Validation Loss')
+        plt.title('Training and Validation Losses')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
+        if do_predict:
+            best_model_path = path+'/'+'checkpoint.pth'
+            self.model.load_state_dict(torch.load(best_model_path))
         
         return self.model
 
     def test(self, setting):
         test_data, test_loader = self._get_data(flag='test')
+        self.scaler = StandardScaler()
         
         self.model.eval()
         
@@ -208,22 +231,28 @@ class Exp_Informer(Exp_Basic):
 
         preds = np.array(preds)
         trues = np.array(trues)
+        preds=self.scaler.inverse_transform(preds)
+        trues=self.scaler.inverse_transform(trues)
         print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
         print('test shape:', preds.shape, trues.shape)
 
-        # result save
-        folder_path = './results/' + setting +'/'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        mae, mse, rmse, mape, mspe, R2 = metric(preds, trues)
+        print('rmse:{}, mae:{}, R2:{}'.format(rmse, mae,R2))
 
-        mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('mse:{}, mae:{}'.format(mse, mae))
+        preds=preds.reshape(-1,1)
+        trues=trues.reshape(-1,1)
 
-        np.save(folder_path+'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
-        np.save(folder_path+'pred.npy', preds)
-        np.save(folder_path+'true.npy', trues)
+        #可视化
+        plt.figure()
+        plt.plot(trues,label='True')
+        plt.plot(preds,label='Predict')
+        plt.title('Predict and Actual Values')
+        plt.xlabel('Time')
+        plt.ylabel('Patv')
+        plt.legend()
+        plt.show()
 
         return
 

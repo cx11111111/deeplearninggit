@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -133,13 +134,14 @@ class Dataset_ETT_minute(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
 
+
         border1s = [0, 12*30*24*4 - self.seq_len, 12*30*24*4+4*30*24*4 - self.seq_len]
         border2s = [12*30*24*4, 12*30*24*4+4*30*24*4, 12*30*24*4+8*30*24*4]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
         
         if self.features=='M' or self.features=='MS':
-            cols_data = df_raw.columns[1:]
+            cols_data = df_raw.columns[3:]
             df_data = df_raw[cols_data]
         elif self.features=='S':
             df_data = df_raw[[self.target]]
@@ -219,6 +221,20 @@ class Dataset_Custom(Dataset):
         self.scaler = StandardScaler()
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
+
+        base_date=datetime(1990,1,1)
+        df_raw['Date']=df_raw['Day'].apply(lambda x: base_date + pd.Timedelta(days=x-1))
+        df_raw['date'] =df_raw.apply(lambda row: datetime(row['Date'].year, row['Date'].month, row['Date'].day, int(row['Tmstamp'].split(':')[0]), int(row['Tmstamp'].split(':')[1])), axis=1)
+
+        columns=['date']+[col for col in df_raw if col!='date']
+        df_raw=df_raw[columns]
+        df_raw.drop(['TurbID','Day','Tmstamp','Date'],axis=1,inplace=True)
+        for col in ['Wspd','Wdir','Etmp','Itmp','Ndir','Pab1','Pab2','Pab3','Prtv','Patv']:
+            df_raw[col]=df_raw[col].fillna(df_raw[col].mean())
+        #print(df_raw)
+
+
+
         '''
         df_raw.columns: ['date', ...(other features), target feature]
         '''

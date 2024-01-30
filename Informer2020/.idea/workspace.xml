@@ -5,31 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88a6230-63e6-4370-a2a1-c9cd55b49218" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/../Autoformer" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ConvFormer" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Deep-Forecast" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../STDN" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Spatiotemporal_UQ" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../transformer" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/NeurIPS2023-One-Fits-All" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/PISA" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/lag-llama" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/llm.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llm/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/llmtime" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/timegpt.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../大模型/timegpt/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GRU/.idea/GRU.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/.idea/GRU.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GRU/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GRU/arima.py" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/arima.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GRU/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exp/exp_informer.py" beforeDir="false" afterPath="$PROJECT_DIR$/exp/exp_informer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_informer.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_informer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,22 +25,22 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="2b4hLtLPsNymg5FNTWGNgow6pZj" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/22279/deeplearninggit/Informer2020"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/22279/deeplearninggit/Informer2020&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">

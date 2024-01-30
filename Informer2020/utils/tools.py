@@ -59,18 +59,31 @@ class StandardScaler():
         self.std = 1.
     
     def fit(self, data):
-        self.mean = data.mean(0)
-        self.std = data.std(0)
+        self.mean = np.mean(data,axis=0)
+        self.std = np.std(data,axis=0)
 
     def transform(self, data):
-        mean = torch.from_numpy(self.mean).type_as(data).to(data.device) if torch.is_tensor(data) else self.mean
-        std = torch.from_numpy(self.std).type_as(data).to(data.device) if torch.is_tensor(data) else self.std
-        return (data - mean) / std
+        if torch.is_tensor(data):
+            mean = torch.as_tensor(self.mean, dtype=data.dtype, device=data.device)
+            std = torch.as_tensor(self.std, dtype=data.dtype, device=data.device)
+        else:
+            mean = self.mean
+            std = self.std
+        return (data - mean) / (std + 1e-8)
 
     def inverse_transform(self, data):
-        mean = torch.from_numpy(self.mean).type_as(data).to(data.device) if torch.is_tensor(data) else self.mean
-        std = torch.from_numpy(self.std).type_as(data).to(data.device) if torch.is_tensor(data) else self.std
-        if data.shape[-1] != mean.shape[-1]:
-            mean = mean[-1:]
-            std = std[-1:]
+        if torch.is_tensor(data):
+            mean = torch.as_tensor(self.mean, dtype=data.dtype, device=data.device)
+            std = torch.as_tensor(self.std, dtype=data.dtype, device=data.device)
+        else:
+            mean = self.mean
+            std = self.std
+
+        # Adjust mean and std shapes for broadcasting if necessary
+        if data.ndim > 1 and (mean.ndim < data.ndim or std.ndim < data.ndim):
+            shape_diff = data.ndim - mean.ndim
+            mean = mean.reshape(*([1] * shape_diff), *mean.shape)
+            std = std.reshape(*([1] * shape_diff), *std.shape)
+
         return (data * std) + mean
+

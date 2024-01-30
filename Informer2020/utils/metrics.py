@@ -23,11 +23,18 @@ def MAPE(pred, true):
 def MSPE(pred, true):
     return np.mean(np.square((pred - true) / true))
 
+def R2_score(pred,true):
+    ss_res=((true-pred)**2).sum(0)
+    ss_tot=((true-true.mean(0))**2).sum(0)
+    r2=1-ss_res/ss_tot
+    return r2.mean()
+
 def metric(pred, true):
     mae = MAE(pred, true)
     mse = MSE(pred, true)
     rmse = RMSE(pred, true)
     mape = MAPE(pred, true)
     mspe = MSPE(pred, true)
+    R2=R2_score(pred,true)
     
-    return mae,mse,rmse,mape,mspe
+    return mae,mse,rmse,mape,mspe,R2

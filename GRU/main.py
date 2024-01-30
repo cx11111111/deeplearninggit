@@ -6,7 +6,7 @@ from tensorflow.python.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 
 #读入数据
-data=pd.read_csv(r"C:\Users\cx\Desktop\数据集\data\firstturbdata.csv",usecols=[12])
+data=pd.read_csv(r"C:\Users\22279\Desktop\数据集\风机功率数据\turb_1.csv",usecols=[12])
 plt.plot(data)
 plt.show()
 #数据预处理
