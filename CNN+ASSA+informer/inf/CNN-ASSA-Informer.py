@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
@@ -222,17 +223,27 @@ def cal_eval(y_real, y_pred):
 
 
 
-df = pd.read_csv('data\\turb_1.csv') # 将你所需要的数据放到data文件夹，然后只要改成你自己的文件名
+df = pd.read_csv('data\\combined_results2.csv')
+
+# base_date=datetime(1990,1,1)
+# df['Date']=df['Day'].apply(lambda x: base_date+pd.Timedelta(days=x-1))
+# df['date']=df.apply(lambda row:datetime(row['Date'].year, row['Date'].month, row['Date'].day,int(row['Tmstamp'].split(':')[0]),int(row['Tmstamp'].split(':')[1])), axis=1)
+# columns=['date']+[col for col in df if col!='date']
+# df=df[columns]
+# df.drop(['TurbID','Day','Tmstamp','Date'],axis=1,inplace=True)
+# for col in ['Wspd','Wdir','Etmp','Itmp','Ndir','Pab1','Pab2','Pab3','Prtv','Patv']:
+#     df[col]=df[col].fillna(df[col].mean())
+
 # 注意多变量情况下，目标变量必须为最后一列
 data_dim = df[df.columns.drop('date')].shape[1]  # 一共多少个变量 这个不去动
-data_target = df['Target']  # 预测的目标变量 把预测的列名改为target
+data_target = df['Patv']  # 预测的目标变量 把预测的列名改为target
 data = df[df.columns.drop('date')]  # 选取所有的数据
 
 
 # 时间戳
 df_stamp = df[['date']]
 df_stamp['date'] = pd.to_datetime(df_stamp.date)
-data_stamp = time_features(df_stamp, timeenc=1, freq='B')  # 这一步很关键，注意数据的freq 你的数据是最小精度是什么就填什么，下面有
+data_stamp = time_features(df_stamp, timeenc=1, freq='T')  # 这一步很关键，注意数据的freq 你的数据是最小精度是什么就填什么，下面有
 
 """
 The following frequencies are supported:
@@ -264,7 +275,7 @@ data_test_mark = data_stamp[int(train_set * data_length):, :]
 
 n_feature = data_dim
 
-window = 16# 模型输入序列长度
+window = 6# 模型输入序列长度
 length_size = 1  # 预测结果的序列长度
 batch_size = 32
 
@@ -311,7 +322,7 @@ class Config:
         self.seq_len = window  # input sequence length
         self.label_len = int(window / 2)  # start token length
         self.pred_len = length_size  # 预测序列长度
-        self.freq = 'b'  # 时间的频率，
+        self.freq = 't'  # 时间的频率，
         # 模型训练
         self.batch_size = batch_size  # 批次大小
         self.num_epochs = num_epochs  # 训练的轮数
@@ -399,7 +410,7 @@ df_pred_true.plot(figsize=(12, 4))
 plt.title(model_type + ' Result')
 plt.show()
 # 将真实值和预测值合并为一个 DataFrame
-result_df = pd.DataFrame({'真实值': true.flatten(), '预测值': pred.flatten()})
+result_df = pd.DataFrame({'Real': true.flatten(), 'Predict': pred.flatten()})
 # 保存 DataFrame 到一个 CSV 文件
 result_df.to_csv('真实值与预测值2.csv', index=False, encoding='utf-8')
 # 打印保存成功的消息
