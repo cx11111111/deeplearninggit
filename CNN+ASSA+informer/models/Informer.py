@@ -1,22 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
 from layers.Transformer_EncDec import Decoder, DecoderLayer, Encoder, EncoderLayer, ConvLayer
 from layers.SelfAttention_Family import ProbAttention, AttentionLayer
 from layers.Embed import DataEmbedding
-from timm.models.layers import trunc_normal_
-
-import torch
-import torch.nn as nn
 import einops
 import pywt
-import torch
-from torch import nn
 from functools import partial
-import torch.nn.functional as F
-
-import torch
-import torch.nn as nn
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import torch.nn.functional as F
 from einops import rearrange, repeat
@@ -39,10 +30,8 @@ except ImportError:
         t = torch.fft.ifft(torch.complex(x[:, :, 0], x[:, :, 1]), dim=(-d))
         return t.real
 
-import torch
-import torch.nn as nn
-from timm.models.layers import trunc_normal_
-from einops import repeat
+
+
 
 # Adapt or Perish: Adaptive Sparse Transformer with Attentive Feature Refinement for Image Restoration, CVPR 2024.
 # https://github.com/joshyZhou/AST
@@ -147,63 +136,59 @@ class WindowAttention_sparse(nn.Module):
         x = self.proj(x)
         x = self.proj_drop(x)
         return x
-"""
-class LSTM(nn.Module):
+
+
+# class CNN(nn.Module):
+#     def __init__(self, input_size, num_filters, kernel_size, num_layers, batch_size, device="cuda"):
+#         super().__init__()
+#         self.device = device
+#         self.input_size = input_size
+#         self.num_filters = num_filters
+#         self.kernel_size = kernel_size
+#         self.num_layers = num_layers
+#         self.batch_size = batch_size
+#
+#         layers = []
+#         for i in range(num_layers):
+#             in_channels = input_size if i == 0 else num_filters
+#             conv_layer = nn.Conv1d(in_channels=in_channels,
+#                                    out_channels=num_filters,
+#                                    kernel_size=kernel_size,
+#                                    padding=(kernel_size - 1) // 2)  # To maintain the same output size
+#             layers.append(conv_layer)
+#             layers.append(nn.ReLU())  # Activation after each conv layer
+#
+#         self.conv_net = nn.Sequential(*layers)
+#         self.to(self.device)
+#
+#     def forward(self, x_enc):
+#         # x_enc: (batch_size, seq_len, input_size)
+#         # Permute to (batch_size, input_size, seq_len) for Conv1d
+#         x_enc = x_enc.permute(0, 2, 1)
+#         output = self.conv_net(x_enc)
+#         # Permute back to (batch_size, seq_len, num_filters)
+#         output = output.permute(0, 2, 1)
+#
+#         return output  # (batch_size, seq_len, num_filters)
+
+
+class GCN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, batch_size, device="cuda"):
-        super().__init__()
+        super(GCN,self).__init__()
         self.device = device
-        self.input_size = input_size
-        self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.batch_size = batch_size
-        self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False)
+        self.layers=nn.ModuleList()
+        self.batch_size=batch_size
 
-    def forward(self, x_enc):
-        batch_size, seq_len = x_enc.shape[0], x_enc.shape[1]
-        h_0 = torch.randn(self.num_layers, batch_size, self.hidden_size).to(self.device)
-        c_0 = torch.randn(self.num_layers, batch_size, self.hidden_size).to(self.device)
-        output, (h, c) = self.lstm(x_enc, (h_0, c_0))
-
-        return output  # torch.Size([batch_size, seq_len, hidden_size])
-
-"""
-import torch
-import torch.nn as nn
-
-
-class CNN(nn.Module):
-    def __init__(self, input_size, num_filters, kernel_size, num_layers, batch_size, device="cuda"):
-        super().__init__()
-        self.device = device
-        self.input_size = input_size
-        self.num_filters = num_filters
-        self.kernel_size = kernel_size
-        self.num_layers = num_layers
-        self.batch_size = batch_size
-
-        layers = []
-        for i in range(num_layers):
-            in_channels = input_size if i == 0 else num_filters
-            conv_layer = nn.Conv1d(in_channels=in_channels,
-                                   out_channels=num_filters,
-                                   kernel_size=kernel_size,
-                                   padding=(kernel_size - 1) // 2)  # To maintain the same output size
-            layers.append(conv_layer)
-            layers.append(nn.ReLU())  # Activation after each conv layer
-
-        self.conv_net = nn.Sequential(*layers)
+        self.layers.append(GCNConv(input_size,hidden_size))#first layer
+        for _ in range(num_layers-1):
+            self.layers.append(GCNConv(hidden_size, hidden_size))#hidden layers
         self.to(self.device)
 
-    def forward(self, x_enc):
-        # x_enc: (batch_size, seq_len, input_size)
-        # Permute to (batch_size, input_size, seq_len) for Conv1d
-        x_enc = x_enc.permute(0, 2, 1)
-        output = self.conv_net(x_enc)
-        # Permute back to (batch_size, seq_len, num_filters)
-        output = output.permute(0, 2, 1)
-
-        return output  # (batch_size, seq_len, num_filters)
-
+    def forward(self, x_enc, edge_index):
+        for layer in self.layers:
+            x_enc=F.relu(layer(x_enc,edge_index))
+        return x_enc
 
 class Model(nn.Module):
     def __init__(self, configs):
@@ -211,9 +196,13 @@ class Model(nn.Module):
         self.task_name = configs.task_name
         self.pred_len = configs.pred_len
         self.label_len = configs.label_len
-        self.cnn = CNN(input_size=configs.enc_in,
-                       num_filters=configs.d_model,
-                       kernel_size=3,
+        # self.cnn = CNN(input_size=configs.enc_in,
+        #                num_filters=configs.d_model,
+        #                kernel_size=3,
+        #                num_layers=2,
+        #                batch_size=configs.batch_size)
+        self.gcn = GCN(input_size=configs.enc_in,
+                       hidden_size=configs.d_model,
                        num_layers=2,
                        batch_size=configs.batch_size)
         self.window_attention_sparse1 = WindowAttention_sparse(configs.d_model, (1, configs.pred_len))
@@ -263,13 +252,6 @@ class Model(nn.Module):
             projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
         )
 
-        if self.task_name in ['imputation', 'anomaly_detection']:
-            self.projection = nn.Linear(configs.d_model, configs.c_out, bias=True)
-        if self.task_name == 'classification':
-            self.act = F.gelu
-            self.dropout = nn.Dropout(configs.dropout)
-            self.projection = nn.Linear(configs.d_model * configs.seq_len, configs.num_class)
-
     def long_forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
@@ -277,7 +259,7 @@ class Model(nn.Module):
         dec_out = self.decoder(dec_out, enc_out, x_mask=None, cross_mask=None)
         return dec_out  # [B, L, D]
 
-    def short_forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+    def short_forecast(self, x_enc, edge_index, x_mark_enc, x_dec, x_mark_dec):
         mean_enc = x_enc.mean(1, keepdim=True).detach()  # B x 1 x E
         x_enc = x_enc - mean_enc
         std_enc = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()  # B x 1 x E
@@ -286,11 +268,15 @@ class Model(nn.Module):
         # 让CNN和informer一起提取信息特征，输出两个信息矩阵，
         # 这两个信息矩阵结合一下再输入解码器里训练
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        cnn_out = self.cnn(x_enc)#初始数据经过CNN网络的特征处理
-        cnn_out = self.window_attention_sparse1(cnn_out)
+        # cnn_out = self.cnn(x_enc)#初始数据经过CNN网络的特征处理
+        # cnn_out = self.window_attention_sparse1(cnn_out)
+        gcn_out = self.gcn(x_enc, edge_index)
+        gcn_out = self.window_attention_sparse1(gcn_out)
+
         # CNN提取的特征经过稀疏注意力的再次处理提取输入到
         # 将CNN和Informer的输出并联进行拼接进入解码器
-        combined_features =enc_out+cnn_out
+        # combined_features =enc_out+cnn_out
+        combined_features = enc_out + gcn_out
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
         combined_out, attns = self.encoder(combined_features, attn_mask=None)
         dec_out = self.decoder(dec_out, combined_out, x_mask=None, cross_mask=None)
@@ -298,42 +284,14 @@ class Model(nn.Module):
         dec_out = dec_out * std_enc + mean_enc
         return dec_out  # [B, L, D]
 
-    def imputation(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask):
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=None)
-        dec_out = self.projection(enc_out)
-        return dec_out
 
-    def anomaly_detection(self, x_enc):
-        enc_out = self.enc_embedding(x_enc, None)
-        enc_out, attns = self.encoder(enc_out, attn_mask=None)
-        dec_out = self.projection(enc_out)
-        return dec_out
 
-    def classification(self, x_enc, x_mark_enc):
-        enc_out = self.enc_embedding(x_enc, None)
-        enc_out, attns = self.encoder(enc_out, attn_mask=None)
-        output = self.act(enc_out)
-        output = self.dropout(output)
-        output = output * x_mark_enc.unsqueeze(-1)
-        output = output.reshape(output.shape[0], -1)
-        output = self.projection(output)
-        return output
-
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+    def forward(self, x_enc, edge_index, x_mark_enc, x_dec, x_mark_dec, mask=None):
         if self.task_name == 'long_term_forecast':
             dec_out = self.long_forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
             return dec_out[:, -self.pred_len:, :]  # [B, L, D]
         if self.task_name == 'short_term_forecast':
-            dec_out = self.short_forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+            dec_out = self.short_forecast(x_enc, edge_index, x_mark_enc, x_dec, x_mark_dec)
             return dec_out[:, -self.pred_len:, :]  # [B, L, D]
-        if self.task_name == 'imputation':
-            dec_out = self.imputation(x_enc, x_mark_enc, x_dec, x_mark_dec, mask)
-            return dec_out  # [B, L, D]
-        if self.task_name == 'anomaly_detection':
-            dec_out = self.anomaly_detection(x_enc)
-            return dec_out  # [B, L, D]
-        if self.task_name == 'classification':
-            dec_out = self.classification(x_enc, x_mark_enc)
-            return dec_out  # [B, N]
+
         return None

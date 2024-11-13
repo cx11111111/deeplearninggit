@@ -17,7 +17,7 @@ plt.rc('font',family='Arial')
 plt.style.use("ggplot")
 # 自己写的函数文件functionfile.py
 # 如果需要调整TSlib-test.ipynb文件的路径位置 注意同时调整导入的路径
-from models import Informer
+from models import CNNInformer
 from utils.timefeatures import time_features
 # 解决画图中文显示问题
 plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -115,7 +115,7 @@ def model_train(net, train_loader, length_size, optimizer, criterion, num_epochs
                 print(f"Epoch: {epoch + 1}, Train Loss: {avg_train_loss:.4f}")
 
     return net, train_loss, epoch + 1
-def model_train_val(net, train_loader, val_loader, length_size, optimizer, criterion, scheduler, num_epochs, device, early_patience=0.15, print_train=False):
+def model_train_val(net, train_loader, val_loader, length_size, optimizer, criterion, scheduler, num_epochs, device, early_patience=0.15, print_train=True):
     """
     训练模型并应用早停机制。
 
@@ -152,7 +152,8 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
         for i, (datapoints, labels, datapoints_mark, labels_mark) in enumerate(train_loader):
             datapoints, labels, datapoints_mark, labels_mark = datapoints.to(device), labels.to(device), datapoints_mark.to(device), labels_mark.to(device)
             optimizer.zero_grad()  # 清空梯度
-            preds = net(datapoints, datapoints_mark, labels, labels_mark, None).squeeze()  # 前向传播
+            preds,_,_ = net(datapoints, datapoints_mark, labels, labels_mark, None)
+            preds=preds.squeeze()  # 前向传播
             labels = labels[:, -length_size:].squeeze()  # 注意这一步
             loss = criterion(preds, labels)  # 计算损失
             loss.backward()  # 反向传播
@@ -162,11 +163,12 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
         avg_train_loss = total_train_loss / len(train_loader)  # 计算本epoch的平均损失
         train_loss.append(avg_train_loss)  # 记录平均损失
 
-        with torch.no_grad():  # 关闭自动求导以节省内存和提高效率
+        with (torch.no_grad()):  # 关闭自动求导以节省内存和提高效率
             total_val_loss = 0
             for val_x, val_y, val_x_mark, val_y_mark in val_loader:
                 val_x, val_y, val_x_mark, val_y_mark = val_x.to(device), val_y.to(device), val_x_mark.to(device), val_y_mark.to(device)  # 将数据移到GPU
-                pred_val_y = net(val_x, val_x_mark, val_y, val_y_mark, None).squeeze()  # 前向传播
+                pred_val_y,_,_ = net(val_x, val_x_mark, val_y, val_y_mark, None)
+                pred_val_y=pred_val_y.squeeze()  # 前向传播
                 val_y = val_y[:, -length_size:].squeeze()  # 注意这一步
                 val_loss_batch = criterion(pred_val_y, val_y)  # 计算损失
                 total_val_loss += val_loss_batch.item()
@@ -190,6 +192,16 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
             if early_stop_counter >= early_patience_epochs:
                 print(f'Early stopping triggered at epoch {epoch + 1}.')
                 break  # 早停
+
+        plt.figure()
+        plt.plot(train_loss,label='Train Loss')
+        plt.plot(val_loss,label='Val Loss')
+        plt.title('Losses')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
 
     net.train()  # 恢复训练模式
     return net, train_loss, val_loss, epoch + 1
@@ -258,8 +270,6 @@ The following frequencies are supported:
         alias: min
     S   - secondly
 """
-#这一部分是有没有验证集的区别
-# # 无验证集
 
 # # 数据归一化
 scaler = MinMaxScaler()
@@ -267,11 +277,14 @@ data_inverse = scaler.fit_transform(np.array(data))
 
 data_length = len(data_inverse)
 train_set = 0.7
+val_set=0.85
 
 data_train = data_inverse[:int(train_set * data_length), :]  # 读取目标数据，第一列记为0：1，后面以此类推, 训练集和验证集，如果是多维输入的话最后一列为目标列数据
 data_train_mark = data_stamp[:int(train_set * data_length), :]
-data_test = data_inverse[int(train_set * data_length):, :]  # 这里把训练集和测试集分开了，也可以换成两个csv文件
-data_test_mark = data_stamp[int(train_set * data_length):, :]
+data_val = data_inverse[int(train_set * data_length):int(val_set * data_length), :]
+data_val_mark = data_stamp[int(train_set * data_length):int(val_set * data_length), :]
+data_test = data_inverse[int(val_set * data_length):, :]  # 这里把训练集和测试集分开了，也可以换成两个csv文件
+data_test_mark = data_stamp[int(val_set * data_length):, :]
 
 n_feature = data_dim
 
@@ -280,37 +293,11 @@ length_size = 1  # 预测结果的序列长度
 batch_size = 32
 
 train_loader, x_train, y_train, x_train_mark, y_train_mark = tslib_data_loader(window, length_size, batch_size, data_train, data_train_mark)
+val_loader, x_val, y_val, x_val_mark, y_val_mark = tslib_data_loader(window, length_size, batch_size, data_val, data_val_mark)
 test_loader, x_test, y_test, x_test_mark, y_test_mark = tslib_data_loader(window, length_size, batch_size, data_test, data_test_mark)
 
-# 有验证集
-"""
-# 数据归一化
-scaler = MinMaxScaler()
-data_inverse = scaler.fit_transform(np.array(data))
-data_length = len(data_inverse)
-train_ratio = 0.7
-val_ratio = 0.9
-# 6：2：2
-window = 30  # 模型输入序列长度 过去30天的数据
-length_size = 1  # 预测结果的序列长度  预测未来1天
-train_size = int(data_length * train_ratio)
-val_size = int(data_length * val_ratio)
-data_train = data_inverse[:train_size, :]
-data_train_mark = data_stamp[:train_size, :]
-data_val = data_inverse[train_size: val_size, :]
-data_val_mark = data_stamp[train_size: val_size, :]
-data_test = data_inverse[val_size:, :]
-data_test_mark = data_stamp[val_size:, :]
-batch_size = 32
-train_loader, x_train, y_train, x_train_mark, y_train_mark = tslib_data_loader(window, length_size, batch_size,
-                                                                               data_train, data_train_mark)
-val_loader, x_val, y_val, x_val_mark, y_val_mark = tslib_data_loader(window, length_size, batch_size, data_val,
-                                                                     data_val_mark)
-test_loader, x_test, y_test, x_test_mark, y_test_mark = tslib_data_loader(window, length_size, batch_size, data_test,
-                                                                          data_test_mark)
-                                                                          """
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-num_epochs = 50 # 训练迭代次数
+num_epochs = 10 # 训练迭代次数
 learning_rate = 0.0001  # 学习率
 scheduler_patience = int(0.25 * num_epochs)  # 转换为整数  学习率调整的patience
 early_patience = 0.2  # 训练迭代的早停比例 即patience=0.25*num_epochs
@@ -355,60 +342,76 @@ class Config:
 config = Config()
 
 model_type = 'Informer'
-net = Informer.Model(config).to(device)
+net = CNNInformer.Model(config).to(device)
 
 criterion = nn.MSELoss().to(device)  # 损失函数
 optimizer = optim.Adam(net.parameters(), lr=learning_rate)  # 优化器
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=scheduler_patience, verbose=True)  # 学习率调整策略
 
-trained_model, train_loss, final_epoch = model_train(net, train_loader, length_size, optimizer, criterion, num_epochs, device, print_train=True)
-"""
-trained_model, train_loss, val_loss, final_epoch = model_train_val(
-    net=net,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    length_size=length_size,
-    optimizer=optimizer,
-    criterion=criterion,
-    scheduler=scheduler,
-    num_epochs=num_epochs,
-    device=device,
-    early_patience=early_patience,
-    print_train=False
-)
-"""
+#trained_model, train_loss, final_epoch = model_train(net, train_loader, length_size, optimizer, criterion, num_epochs, device, print_train=True)
+
+trained_model, train_loss, val_loss, final_epoch = model_train_val(net, train_loader, val_loader, length_size, optimizer,
+                                                                   criterion, scheduler, num_epochs, device, early_patience=early_patience, print_train=True)
+
 trained_model.eval()  # 模型转换为验证模式
 # 预测并调整维度
-pred = trained_model(x_test.to(device), x_test_mark.to(device), y_test.to(device), y_test_mark.to(device))
+pred,mean,std = trained_model(x_test.to(device), x_test_mark.to(device), y_test.to(device), y_test_mark.to(device))
+
+
 true = y_test[:,-length_size:,-1:].detach().cpu()
 pred = pred.detach().cpu()
+mean=mean.detach().cpu()
+std=std.detach().cpu()
 # 检查pred和true的维度并调整
 print("Shape of true before adjustment:", true.shape)
 print("Shape of pred before adjustment:", pred.shape)
+print("Shape of before adjustment:",mean.shape,std.shape)
 
 # 可能需要调整pred和true的维度，使其变为二维数组
 true = true[:, :, -1]
 pred = pred[:, :, -1]  # 假设需要将pred调整为二维数组，去掉最后一维
+mean=mean[:, :, -1]
+std=std[:, :, -1]
 # true =np.array(true)
 # 假设需要将true调整为二维数组
 
 print("Shape of pred after adjustment:", pred.shape)
 print("Shape of true after adjustment:", true.shape)
+print("Shape of after adjustment:",mean.shape,std.shape)
+
 
  #这段代码是为了重新更新scaler，因为之前定义的scaler是是十六维，这里重新根据目标数据定义一下scaler
 y_data_test_inverse = scaler.fit_transform(np.array(data_target).reshape(-1, 1))
 pred_uninverse = scaler.inverse_transform(pred[:, -1:])    #如果是多步预测， 选取最后一列
 true_uninverse = scaler.inverse_transform(true[:, -1:])
+mean_uninverse = scaler.inverse_transform(mean[:, -1:])
+std_uninverse = scaler.inverse_transform(std[:, -1:])
 
-true, pred = true_uninverse, pred_uninverse
+true, pred,mean,std = true_uninverse, pred_uninverse,mean_uninverse,std_uninverse
+
+
+print(mean,std)
 
 df_eval = cal_eval(true, pred)  # 评估指标dataframe
 print(df_eval)
 
+
 df_pred_true = pd.DataFrame({'Predict': pred.flatten(), 'Real': true.flatten()})
+x=range(len(df_pred_true))
 df_pred_true.plot(figsize=(12, 4))
+ci_levels=[0.674,1.0,1.645,1.96]
+colors=['lightblue', 'skyblue', 'deepskyblue', 'dodgerblue']
+labels=['25% CI', '50% CI', '75% CI', '95% CI']
+for i,ci in enumerate(ci_levels):
+    lower_bound=mean-ci*std
+    upper_bound=mean+ci*std
+    plt.fill_between(x,lower_bound.flatten(), upper_bound.flatten(), color=colors[i], alpha=0.3, label=labels[i])
+plt.xlabel('Time Steps')
+plt.ylabel('Predicted Value')
 plt.title(model_type + ' Result')
+plt.legend()
 plt.show()
+
 # 将真实值和预测值合并为一个 DataFrame
 result_df = pd.DataFrame({'Real': true.flatten(), 'Predict': pred.flatten()})
 # 保存 DataFrame 到一个 CSV 文件
