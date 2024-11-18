@@ -115,6 +115,11 @@ def model_train(net, train_loader, length_size, optimizer, criterion, num_epochs
                 print(f"Epoch: {epoch + 1}, Train Loss: {avg_train_loss:.4f}")
 
     return net, train_loss, epoch + 1
+
+def quantile_loss(pred,true,quantile):
+    errors=true-pred
+    return torch.max((quantile-1)*errors,quantile*errors).mean()
+
 def model_train_val(net, train_loader, val_loader, length_size, optimizer, criterion, scheduler, num_epochs, device, early_patience=0.15, print_train=True):
     """
     训练模型并应用早停机制。
@@ -136,7 +141,6 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
         list: 训练过程中每个epoch的平均验证损失列表。
         int: 早停触发时的epoch数。
     """
-
     train_loss = []  # 用于记录每个epoch的平均损失
     val_loss = []  # 用于记录验证集上的损失，用于早停判断
     print_frequency = num_epochs / 20  # 计算打印频率
@@ -152,10 +156,13 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
         for i, (datapoints, labels, datapoints_mark, labels_mark) in enumerate(train_loader):
             datapoints, labels, datapoints_mark, labels_mark = datapoints.to(device), labels.to(device), datapoints_mark.to(device), labels_mark.to(device)
             optimizer.zero_grad()  # 清空梯度
-            preds,_,_ = net(datapoints, datapoints_mark, labels, labels_mark, None)
+            #quantile_preds=net(datapoints, datapoints_mark, labels, labels_mark, None)
+            preds,_ = net(datapoints, datapoints_mark, labels, labels_mark, None)
             preds=preds.squeeze()  # 前向传播
             labels = labels[:, -length_size:].squeeze()  # 注意这一步
+            #losses=[quantile_loss(pred,labels,q) for pred, q in zip(preds, quantiles)]
             loss = criterion(preds, labels)  # 计算损失
+
             loss.backward()  # 反向传播
             optimizer.step()  # 更新模型参数
             total_train_loss += loss.item()  # 累加损失值
@@ -167,9 +174,10 @@ def model_train_val(net, train_loader, val_loader, length_size, optimizer, crite
             total_val_loss = 0
             for val_x, val_y, val_x_mark, val_y_mark in val_loader:
                 val_x, val_y, val_x_mark, val_y_mark = val_x.to(device), val_y.to(device), val_x_mark.to(device), val_y_mark.to(device)  # 将数据移到GPU
-                pred_val_y,_,_ = net(val_x, val_x_mark, val_y, val_y_mark, None)
+                pred_val_y,_ = net(val_x, val_x_mark, val_y, val_y_mark, None)
                 pred_val_y=pred_val_y.squeeze()  # 前向传播
                 val_y = val_y[:, -length_size:].squeeze()  # 注意这一步
+                #val_loss_batch=[quantile_loss(pred,val_y,q) for pred, q in zip(pred_val_y, quantiles)]
                 val_loss_batch = criterion(pred_val_y, val_y)  # 计算损失
                 total_val_loss += val_loss_batch.item()
 
@@ -340,10 +348,9 @@ class Config:
 
 
 config = Config()
-
-model_type = 'Informer'
 net = CNNInformer.Model(config).to(device)
 
+quantiles=[0.025,0.125,0.25,0.375,0.625,0.75,0.875,0.975]
 criterion = nn.MSELoss().to(device)  # 损失函数
 optimizer = optim.Adam(net.parameters(), lr=learning_rate)  # 优化器
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=scheduler_patience, verbose=True)  # 学习率调整策略
@@ -355,66 +362,77 @@ trained_model, train_loss, val_loss, final_epoch = model_train_val(net, train_lo
 
 trained_model.eval()  # 模型转换为验证模式
 # 预测并调整维度
-pred,mean,std = trained_model(x_test.to(device), x_test_mark.to(device), y_test.to(device), y_test_mark.to(device))
+pred,output_dict = trained_model(x_test.to(device), x_test_mark.to(device), y_test.to(device), y_test_mark.to(device))
 
 
 true = y_test[:,-length_size:,-1:].detach().cpu()
 pred = pred.detach().cpu()
-mean=mean.detach().cpu()
-std=std.detach().cpu()
+output_dict={q:tensor.detach().cpu() for q,tensor in output_dict.items()}
 # 检查pred和true的维度并调整
-print("Shape of true before adjustment:", true.shape)
-print("Shape of pred before adjustment:", pred.shape)
-print("Shape of before adjustment:",mean.shape,std.shape)
+print("Shape of true before adjustment:", true.shape,pred.shape)
+for quantile, tensor in output_dict.items():
+    print(f"Quantile {quantile}: Shape {tensor.shape}")
 
 # 可能需要调整pred和true的维度，使其变为二维数组
 true = true[:, :, -1]
 pred = pred[:, :, -1]  # 假设需要将pred调整为二维数组，去掉最后一维
-mean=mean[:, :, -1]
-std=std[:, :, -1]
+output_dict={q:tensor[:,:,-1] for q,tensor in output_dict.items()}
 # true =np.array(true)
 # 假设需要将true调整为二维数组
 
-print("Shape of pred after adjustment:", pred.shape)
-print("Shape of true after adjustment:", true.shape)
-print("Shape of after adjustment:",mean.shape,std.shape)
+print("Shape of pred after adjustment:", true.shape,pred.shape)
+for q, tensor in output_dict.items():
+    print(f"Quantile {q}: Adjusted Shape {tensor.shape}")
+
 
 
  #这段代码是为了重新更新scaler，因为之前定义的scaler是是十六维，这里重新根据目标数据定义一下scaler
-y_data_test_inverse = scaler.fit_transform(np.array(data_target).reshape(-1, 1))
-pred_uninverse = scaler.inverse_transform(pred[:, -1:])    #如果是多步预测， 选取最后一列
-true_uninverse = scaler.inverse_transform(true[:, -1:])
-mean_uninverse = scaler.inverse_transform(mean[:, -1:])
-std_uninverse = scaler.inverse_transform(std[:, -1:])
+# y_data_test_inverse = scaler.fit_transform(np.array(data_target).reshape(-1, 1))
+# pred_uninverse = scaler.inverse_transform(pred[:, -1:])    #如果是多步预测， 选取最后一列
+# true_uninverse = scaler.inverse_transform(true[:, -1:])
+# output_dict_uninverse={q:scaler.inverse_transform(output_dict) for q,tensor in output_dict.items()}
+#
+#
+# true, pred,output_dict = true_uninverse, pred_uninverse,output_dict_uninverse
 
-true, pred,mean,std = true_uninverse, pred_uninverse,mean_uninverse,std_uninverse
+# print(true.shape,pred.shape)
+# for q, tensor in output_dict.items():
+#     print(f"Quantile {q}: Adjusted Shape {tensor.shape}")
 
-
-print(mean,std)
 
 df_eval = cal_eval(true, pred)  # 评估指标dataframe
 print(df_eval)
 
+output_dict={q:tensor.squeeze() for q,tensor in output_dict.items()}
 
-df_pred_true = pd.DataFrame({'Predict': pred.flatten(), 'Real': true.flatten()})
-x=range(len(df_pred_true))
-df_pred_true.plot(figsize=(12, 4))
-ci_levels=[0.674,1.0,1.645,1.96]
-colors=['lightblue', 'skyblue', 'deepskyblue', 'dodgerblue']
-labels=['25% CI', '50% CI', '75% CI', '95% CI']
-for i,ci in enumerate(ci_levels):
-    lower_bound=mean-ci*std
-    upper_bound=mean+ci*std
-    plt.fill_between(x,lower_bound.flatten(), upper_bound.flatten(), color=colors[i], alpha=0.3, label=labels[i])
+x=range(len(pred))
+plt.plot(figsize=(12, 4))
+# plt.fill_between(x,output_dict[0.025],output_dict[0.975],color='blue',alpha=0.1,label='95% confidence interval',zorder=1)
+# plt.fill_between(x,output_dict[0.125],output_dict[0.875],color='blue',alpha=0.2,label='75% confidence interval',zorder=2)
+# plt.fill_between(x,output_dict[0.25],output_dict[0.75],color='blue',alpha=0.3,label='50% confidence interval',zorder=3)
+# plt.fill_between(x,output_dict[0.375],output_dict[0.625],color='blue',alpha=0.4,label='25% confidence interval',zorder=4)
+plt.plot(x,output_dict[0.025],label='2.5% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.125],label='12.5% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.25],label='25% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.375],label='37.5% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.625],label='62.5% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.75],label='75% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.875],label='87.5% quantile number',linestyle='--')
+plt.plot(x,output_dict[0.975],label='97.5% quantile number',linestyle='--')
+plt.plot(x,true,label='true values')
+plt.plot(x,pred,label='predicted values')
 plt.xlabel('Time Steps')
 plt.ylabel('Predicted Value')
-plt.title(model_type + ' Result')
+plt.title('Prediction vs Actual Value')
 plt.legend()
 plt.show()
 
 # 将真实值和预测值合并为一个 DataFrame
 result_df = pd.DataFrame({'Real': true.flatten(), 'Predict': pred.flatten()})
 # 保存 DataFrame 到一个 CSV 文件
-result_df.to_csv('真实值与预测值2.csv', index=False, encoding='utf-8')
-# 打印保存成功的消息
-print('真实值和预测值已保存到真实值与预测值.csv文件中。')
+result_df.to_csv('真实值与预测值.csv', index=False, encoding='utf-8')
+df=pd.DataFrame()
+for q,tensor in output_dict.items():
+    df[q]=tensor
+df.to_csv('quantile_data.csv',index=False,encoding='utf-8')
+

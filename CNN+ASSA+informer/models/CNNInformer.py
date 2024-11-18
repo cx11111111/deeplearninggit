@@ -193,8 +193,9 @@ class CNN(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, configs):
+    def __init__(self, configs,quantiles=[0.025,0.125,0.25,0.375,0.625,0.75,0.875,0.975]):
         super(Model, self).__init__()
+        self.quantiles = quantiles
         self.task_name = configs.task_name
         self.pred_len = configs.pred_len
         self.label_len = configs.label_len
@@ -250,48 +251,42 @@ class Model(nn.Module):
             projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
         )
 
+        self.output_layers = nn.ModuleList([nn.Linear(configs.enc_in, configs.c_out) for _ in self.quantiles])
 
-    def long_forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        enc_out, attns = self.encoder(enc_out, attn_mask=None)
-        dec_out = self.decoder(dec_out, enc_out, x_mask=None, cross_mask=None)
-        return dec_out  # [B, L, D]
 
-    def short_forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+
+        #对输入序列数据 x_enc 进行标准化处理，减去平均值 mean_enc 并除以标准差 std_enc，以确保训练的稳定性
         mean_enc = x_enc.mean(1, keepdim=True).detach()  # B x 1 x E
         x_enc = x_enc - mean_enc
         std_enc = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()  # B x 1 x E
         x_enc = x_enc / std_enc
-        #分别读取序列数据进行处理
+
         # 让CNN和informer一起提取信息特征，输出两个信息矩阵，
         # 这两个信息矩阵结合一下再输入解码器里训练
+        #将标准化后的输入 x_enc 和时间戳标记 x_mark_enc 通过Informer的 enc_embedding 方法提取特征
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        cnn_out = self.cnn(x_enc)#初始数据经过CNN网络的特征处理
+        # 初始数据经过CNN网络的特征处理
+        cnn_out = self.cnn(x_enc)
+        # CNN提取的特征经过稀疏注意力的再次处理提取
         cnn_out = self.window_attention_sparse1(cnn_out)
-        # CNN提取的特征经过稀疏注意力的再次处理提取输入到
-        # 将CNN和Informer的输出并联进行拼接进入解码器
+        #将CNN和Informer的输出并联进行拼接进入解码器
         combined_features =enc_out+cnn_out
-        dec_out = self.dec_embedding(x_dec, x_mark_dec)
         combined_out, attns = self.encoder(combined_features, attn_mask=None)
+        dec_out = self.dec_embedding(x_dec, x_mark_dec)
+        # combined_out 与解码输出序列 dec_out 一起传入解码器
         dec_out = self.decoder(dec_out, combined_out, x_mask=None, cross_mask=None)
-
+        #利用 std_enc 和 mean_enc 反向还原之前的标准化
         dec_out = dec_out * std_enc + mean_enc
+        #返回最后 self.pred_len 个时间步（即预测结果）
+        dec_out=dec_out[:, -self.pred_len:, :]  # [B, L, D]
 
-        mean_enc = dec_out.mean(1, keepdim=True).detach()
-        std_enc = dec_out.std(1, keepdim=True).detach()
+        quantile_outputs=[layer(dec_out) for layer in self.output_layers]
+        quantile_dict={q:output for q,output in zip(self.quantiles,quantile_outputs)}
 
-        # lower_bound=mean_enc-1.96*std_enc
-        # upper_bound=mean_enc+1.96*std_enc
-        return dec_out,mean_enc,std_enc  # [B, L, D]
+        return dec_out,quantile_dict
 
 
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        if self.task_name == 'long_term_forecast':
-            dec_out = self.long_forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-            return dec_out[:, -self.pred_len:, :]  # [B, L, D]
-        if self.task_name == 'short_term_forecast':
-            dec_out,mean_enc,std_enc = self.short_forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-            return dec_out[:, -self.pred_len:, :],mean_enc[:, -self.pred_len:, :],std_enc[:, -self.pred_len:, :]  # [B, L, D]
-        return None
+
+
