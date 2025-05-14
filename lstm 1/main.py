@@ -5,7 +5,16 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader,TensorDataset
 
-data=pd.read_csv(r"C:\Users\22279\Desktop\数据集\wind_dataset.csv",usecols=[1])
+def quantile_loss(q, y_true, y_pred):
+    """
+    q: 分位数 (0 < q < 1)
+    y_true: 真实值 (torch tensor)
+    y_pred: 预测值 (torch tensor)
+    """
+    e = y_true - y_pred
+    return torch.mean(torch.max(q * e, (q - 1) * e))
+
+data=pd.read_csv(r'C:\Users\22279\deeplearninggit\CNN+ASSA+informer\data\turb_1.csv',usecols=[12])
 plt.plot(data)
 plt.show()
 #数据预处理
@@ -93,56 +102,70 @@ num_epochs=10
 batch_size=64
 train_data=TensorDataset(train_x,train_y)
 train_loader=DataLoader(train_data,batch_size=batch_size,shuffle=False)
+
 model=LSTMModel(input_size,hidden_size1,hidden_size2,hidden_size3,output_size)
 model.to(device)
 criterion=torch.nn.MSELoss()
-optimizer=torch.optim.Adam(model.parameters(),lr=learning_rate,weight_decay=0.00015)
 
 
-#from torchinfo import summary
-#print(summary(net,input_size=(175,5,1)))
+
 
 for param_tensor in model.state_dict():
     print(param_tensor,model.state_dict()[param_tensor].size())
 
+quantiles = [0.025,0.125,0.25,0.375,0.625,0.75,0.875, 0.975]
+models = {}
+optimizers = {}
+
+for q in quantiles:
+    models[q]=LSTMModel(input_size,hidden_size1,hidden_size2,hidden_size3,output_size).to(device)
+    optimizers[q] = torch.optim.Adam(models[q].parameters(), lr=learning_rate, weight_decay=0.00015)
+
 #训练模型
-train_losses,val_losses=[],[]
-for epoch in range(num_epochs):
-    train_loss=0.0
-    model.train()
-    for inputs,labels in train_loader:
-        optimizer.zero_grad()
-        outputs=model(inputs)
-        loss=criterion(outputs,labels)
-        loss.backward()
-        optimizer.step()
-        train_loss+=loss.item()*inputs.size(0)
-    #计算平均损失
-    train_loss/=len(train_loader.dataset)
-    train_losses.append(train_loss)
+for q in quantiles:
+    model=models[q]
+    optimizer=optimizers[q]
+    for epoch in range(num_epochs):
+        train_loss=0.0
+        model.train()
+        for inputs,labels in train_loader:
+            optimizer.zero_grad()
+            outputs=model(inputs)
+            loss=quantile_loss(q,outputs,labels)
+            loss.backward()
+            optimizer.step()
+            train_loss+=loss.item()*inputs.size(0)
+        #计算平均损失
+        train_loss/=len(train_loader.dataset)
 
-    #评估模型
+        #评估模型
+        model.eval()
+        with torch.no_grad():
+            val_outputs=model(val_x)
+            val_loss=quantile_loss(q,val_outputs,val_y)
+        print('Quantile {},Epoch [{}/{}],Train Loss:{:.4f},Val Loss:{:.4f}'.format(q,epoch+1,num_epochs,train_loss,val_loss))
+
     model.eval()
-    with torch.no_grad():
-        val_outputs=model(val_x)
-        val_loss=criterion(val_outputs,val_y)
-    val_losses.append(val_loss.item())
-    print('Epoch [{}/{}],Train Loss:{:.4f},Val Loss:{:.4f}'.format(epoch+1,num_epochs,train_loss,val_loss))
 
-plt.plot(train_losses,label='train loss')
-plt.plot(val_losses,label='val loss')
-plt.legend(loc='best')
-plt.xlabel('epoch')
-plt.ylabel('loss')
-plt.show()
+y_lower_pred95 = models[0.025](test_x.to(device)).detach().cpu()
+y_upper_pred95 = models[0.975](test_x.to(device)).detach().cpu()
 
-model=model.eval()
-test_x=test_x.to(device)
-prediction=model(test_x)
-prediction=prediction.data.cpu()
+y_lower_pred75 = models[0.125](test_x.to(device)).detach().cpu()
+y_upper_pred75 = models[0.875](test_x.to(device)).detach().cpu()
 
-plt.plot(prediction,label='predict')
-plt.plot(test_y,label='real')
+y_lower_pred50 = models[0.25](test_x.to(device)).detach().cpu()
+y_upper_pred50 = models[0.75](test_x.to(device)).detach().cpu()
+
+y_lower_pred25 = models[0.375](test_x.to(device)).detach().cpu()
+y_upper_pred25 = models[0.625](test_x.to(device)).detach().cpu()
+
+plt.figure()
+plt.plot(range(300),test_y[100:400],label='real')
+plt.fill_between(range(300), y_lower_pred95[100:400], y_upper_pred95[100:400], color="green", alpha=0.1, label="95% prediction interval")
+plt.fill_between(range(300), y_lower_pred75[100:400], y_upper_pred75[100:400], color="green", alpha=0.3, label="75% prediction interval")
+plt.fill_between(range(300), y_lower_pred50[100:400], y_upper_pred50[100:400], color="green", alpha=0.5, label="50% prediction interval")
+plt.fill_between(range(300), y_lower_pred25[100:400], y_upper_pred25[100:400], color="green", alpha=0.7, label="25% prediction interval")
+
 plt.legend(loc='best')
 plt.show()
 

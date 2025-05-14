@@ -9,9 +9,9 @@ parser = argparse.ArgumentParser(description='[Informer] Long Sequences Forecast
 
 parser.add_argument('--model', type=str, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-parser.add_argument('--data', type=str, default='turb_23', help='data')
-parser.add_argument('--root_path', type=str, default='C:/Users/22279/Desktop/数据集/风机功率数据/', help='root path of the data file')
-parser.add_argument('--data_path', type=str, default='turb_23.csv', help='data file')
+parser.add_argument('--data', type=str, default='turb_1', help='data')
+parser.add_argument('--root_path', type=str, default='C:/Users/22279/deeplearninggit/CNN+ASSA+informer/data/', help='root path of the data file')
+parser.add_argument('--data_path', type=str, default='turb_1.csv', help='data file')
 parser.add_argument('--features', type=str, default='MS', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
 parser.add_argument('--target', type=str, default='Patv', help='target feature in S or MS task')
 parser.add_argument('--freq', type=str, default='t', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
@@ -77,7 +77,7 @@ data_parser = {
     'WTH':{'data':'WTH.csv','T':'WetBulbCelsius','M':[12,12,12],'S':[1,1,1],'MS':[12,12,1]},
     'ECL':{'data':'ECL.csv','T':'MT_320','M':[321,321,321],'S':[1,1,1],'MS':[321,321,1]},
     'Solar':{'data':'solar_AL.csv','T':'POWER_136','M':[137,137,137],'S':[1,1,1],'MS':[137,137,1]},
-    'turb_23':{'data':'turb_23.csv','T':'Patv','M':[10,10,10],'S':[1,1,1],'MS':[10,10,1]},
+    'turb_1':{'data':'turb_1.csv','T':'Patv','M':[10,10,10],'S':[1,1,1],'MS':[10,10,1]},
 }
 if args.data in data_parser.keys():
     data_info = data_parser[args.data]

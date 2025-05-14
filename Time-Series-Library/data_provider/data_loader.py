@@ -9,8 +9,9 @@ from sklearn.preprocessing import StandardScaler
 from utils.timefeatures import time_features
 from data_provider.m4 import M4Dataset, M4Meta
 from data_provider.uea import subsample, interpolate_missing, Normalizer
-#from sktime.datasets import load_from_tsfile_to_dataframe
+from sktime.datasets import load_from_tsfile_to_dataframe
 import warnings
+from datetime import datetime
 
 warnings.filterwarnings('ignore')
 
@@ -77,7 +78,7 @@ class Dataset_ETT_hour(Dataset):
             data_stamp = df_stamp.drop(['date'], 1).values
         elif self.timeenc == 1:
             data_stamp = time_features(pd.to_datetime(df_stamp['date'].values), freq=self.freq)
-            data_stamp = data_stamp.transpose(1, 0)
+            data_stamp = data_stamp.transpose(1, 0) 
 
         self.data_x = data[border1:border2]
         self.data_y = data[border1:border2]
@@ -226,6 +227,22 @@ class Dataset_Custom(Dataset):
         self.scaler = StandardScaler()
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
+
+        TARGET_COL = 'Patv'
+        df_raw = df_raw[df_raw[TARGET_COL] >= 0]
+        df_raw.dropna(inplace=True)
+
+        base_date = datetime(1990, 1, 1)
+        df_raw['Date'] = df_raw['Day'].apply(lambda x: base_date + pd.Timedelta(days=x - 1))
+        df_raw['date'] = df_raw.apply(lambda row: datetime(row['Date'].year, row['Date'].month, row['Date'].day,
+                                                           int(row['Tmstamp'].split(':')[0]),
+                                                           int(row['Tmstamp'].split(':')[1])), axis=1)
+
+        columns = ['date'] + [col for col in df_raw if col != 'date']
+        df_raw = df_raw[columns]
+        df_raw.drop(['TurbID', 'Day', 'Tmstamp', 'Date'], axis=1, inplace=True)
+        for col in ['Wspd', 'Wdir', 'Etmp', 'Itmp', 'Ndir', 'Pab1', 'Pab2', 'Pab3', 'Prtv', 'Patv']:
+            df_raw[col] = df_raw[col].fillna(df_raw[col].mean())
 
         '''
         df_raw.columns: ['date', ...(other features), target feature]
@@ -386,7 +403,8 @@ class PSMSegLoader(Dataset):
         test_data = np.nan_to_num(test_data)
         self.test = self.scaler.transform(test_data)
         self.train = data
-        self.val = self.test
+        data_len = len(self.train)
+        self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = pd.read_csv(os.path.join(root_path, 'test_label.csv')).values[:, 1:]
         print("test:", self.test.shape)
         print("train:", self.train.shape)
@@ -428,7 +446,8 @@ class MSLSegLoader(Dataset):
         test_data = np.load(os.path.join(root_path, "MSL_test.npy"))
         self.test = self.scaler.transform(test_data)
         self.train = data
-        self.val = self.test
+        data_len = len(self.train)
+        self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(os.path.join(root_path, "MSL_test_label.npy"))
         print("test:", self.test.shape)
         print("train:", self.train.shape)
@@ -470,7 +489,8 @@ class SMAPSegLoader(Dataset):
         test_data = np.load(os.path.join(root_path, "SMAP_test.npy"))
         self.test = self.scaler.transform(test_data)
         self.train = data
-        self.val = self.test
+        data_len = len(self.train)
+        self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(os.path.join(root_path, "SMAP_test_label.npy"))
         print("test:", self.test.shape)
         print("train:", self.train.shape)
@@ -560,7 +580,8 @@ class SWATSegLoader(Dataset):
         test_data = self.scaler.transform(test_data)
         self.train = train_data
         self.test = test_data
-        self.val = test_data
+        data_len = len(self.train)
+        self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = labels
         print("test:", self.test.shape)
         print("train:", self.train.shape)
@@ -654,6 +675,7 @@ class UEAloader(Dataset):
             data_paths = list(filter(lambda x: re.search(flag, x), data_paths))
         input_paths = [p for p in data_paths if os.path.isfile(p) and p.endswith('.ts')]
         if len(input_paths) == 0:
+            pattern='*.ts'
             raise Exception("No .ts files found using pattern: '{}'".format(pattern))
 
         all_df, labels_df = self.load_single(input_paths[0])  # a single file contains dataset

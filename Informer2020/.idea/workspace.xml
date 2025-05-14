@@ -5,14 +5,114 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88a6230-63e6-4370-a2a1-c9cd55b49218" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/../GRU/.idea/GRU.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/.idea/GRU.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../GRU/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../GRU/arima.py" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/arima.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../GRU/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../GRU/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Autoformer/data_provider/data_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Autoformer/data_provider/data_factory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Autoformer/data_provider/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Autoformer/data_provider/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Autoformer/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Autoformer/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/CNN-ASSA-Informer.py" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/CNN-ASSA-Informer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/RIME-VMD.py" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/RIME-VMD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/RIME_para.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/RIME_para.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/all_imfs.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/all_imfs.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/RIME-VMD/turb_1.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/correlation/correlation_matrix.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/correlation/相关性选择.py" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/correlation/相关性选择.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/data/combined_results1.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/data/combined_results1.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/data/combined_results2.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/data/combined_results2.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/data/turb_location.CSV" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/data/turb_location.CSV" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/models/1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/models/CNNInformer.py" beforeDir="false" afterPath="$PROJECT_DIR$/../CNN+ASSA+informer/models/CNNInformer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/quantile_data.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/真实值与预测值.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CNN+ASSA+informer/真实值与预测值2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/SETR.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/anti_over_smoothing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/patcher_parts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/transformer2d_parts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/transformer_parts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/unets_parts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/vit_seg_configs.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/components/vit_seg_modeling_resnet_skip.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/models/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/train.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/evaluation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/imgname.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/loss_functions/TopK_loss.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/loss_functions/crossentropy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/loss_functions/dice_loss.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/loss_functions/nd_softmax.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/loss_functions/tensor_utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/metrics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/record_tools.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/utils_gray.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/utils_rgb.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ConvFormer/utils/visualization.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/Deep-Forecast.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/DeepForecast_Poster.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/MS_winds.dat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Deep-Forecast/multiLSTM.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/checkpoints/informer_turb_23_ftMS_sl144_ll72_pl1_dm512_nh8_el2_dl1_df2048_atprob_fc5_ebtimeF_dtTrue_mxTrue_test_0/checkpoint.pth" beforeDir="false" afterPath="$PROJECT_DIR$/checkpoints/informer_turb_23_ftMS_sl144_ll72_pl1_dm512_nh8_el2_dl1_df2048_atprob_fc5_ebtimeF_dtTrue_mxTrue_test_0/checkpoint.pth" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/checkpoints/informer_turb_23_ftMS_sl144_ll72_pl1_dm512_nh8_el2_dl1_df2048_atprob_fc5_ebtimeF_dtTrue_mxTrue_test_1/checkpoint.pth" beforeDir="false" afterPath="$PROJECT_DIR$/checkpoints/informer_turb_23_ftMS_sl144_ll72_pl1_dm512_nh8_el2_dl1_df2048_atprob_fc5_ebtimeF_dtTrue_mxTrue_test_1/checkpoint.pth" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/exp/exp_informer.py" beforeDir="false" afterPath="$PROJECT_DIR$/exp/exp_informer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_informer.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_informer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/attention.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/data.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/data.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/data_bike.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/file_loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../STDN/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/.idea/Time-Series-Library.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/.idea/Time-Series-Library.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/data_provider/data_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/data_provider/data_factory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/data_provider/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/data_provider/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/data_provider/m4.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/data_provider/m4.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_classification.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_classification.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_imputation.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_imputation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_long_term_forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/exp/exp_long_term_forecasting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/layers/Embed.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/layers/Embed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/layers/FourierCorrelation.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/layers/FourierCorrelation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/layers/SelfAttention_Family.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/layers/SelfAttention_Family.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/models/FEDformer.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/models/FEDformer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/imputation/ETT_script/TimesNet_ETTh1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/imputation/ETT_script/TimesNet_ETTh1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ECL_script/Nonstationary_Transformer.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ECL_script/Nonstationary_Transformer.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/MICN_ETTh1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/MICN_ETTh1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/MICN_ETTh2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/MICN_ETTh2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/TimesNet_ETTh1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ETT_script/TimesNet_ETTh1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ILI_script/MICN.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/ILI_script/MICN.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/Traffic_script/Transformer.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/scripts/long_term_forecast/Traffic_script/Transformer.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Time-Series-Library/utils/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Time-Series-Library/utils/tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm 1/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../lstm 1/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/lstm.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lstm/main.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,12 +135,28 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Python.data_loader.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_informer.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/22279/deeplearninggit/Informer2020&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/22279/deeplearninggit/CNN+ASSA+informer&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
+        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">
@@ -49,18 +165,32 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1705480205572</updated>
+      <workItem from="1728528004861" duration="2474000" />
+      <workItem from="1728569738578" duration="8671000" />
+      <workItem from="1728903858591" duration="1198000" />
+      <workItem from="1732198311151" duration="2937000" />
+      <workItem from="1732250095997" duration="1410000" />
+      <workItem from="1736858030467" duration="343000" />
+      <workItem from="1736919765927" duration="10000" />
+      <workItem from="1736923678605" duration="31000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main_informer.py</url>
-          <line>103</line>
+          <line>108</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Informer2020$main_informer.coverage" NAME="main_informer 覆盖结果" MODIFIED="1736858081279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

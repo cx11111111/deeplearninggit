@@ -1,13 +1,15 @@
 import os
 import torch
-from models import Autoformer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
-    Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM
+from models import TimeLLM,Autoformer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
+    Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
+    Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, MambaSimple, Mamba
 
 
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         self.model_dict = {
+            'TimeLLM': TimeLLM,
             'TimesNet': TimesNet,
             'Autoformer': Autoformer,
             'Transformer': Transformer,
@@ -23,6 +25,15 @@ class Exp_Basic(object):
             'MICN': MICN,
             'Crossformer': Crossformer,
             'FiLM': FiLM,
+            'iTransformer': iTransformer,
+            'Koopa': Koopa,
+            'TiDE': TiDE,
+            'FreTS': FreTS,
+            'MambaSimple': MambaSimple,
+            'Mamba': Mamba,
+            'TimeMixer': TimeMixer,
+            'TSMixer': TSMixer,
+            'SegRNN': SegRNN
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)

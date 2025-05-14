@@ -73,7 +73,7 @@ class Exp_Informer(Exp_Basic):
             'ECL':Dataset_Custom,
             'Solar':Dataset_Custom,
             'custom':Dataset_Custom,
-            'turb_23':Dataset_Custom,
+            'turb_1':Dataset_Custom,
         }
         Data = data_dict[self.args.data]
         timeenc = 0 if args.embed!='timeF' else 1
@@ -231,28 +231,28 @@ class Exp_Informer(Exp_Basic):
 
         preds = np.array(preds)
         trues = np.array(trues)
-        preds=self.scaler.inverse_transform(preds)
-        trues=self.scaler.inverse_transform(trues)
-        print('test shape:', preds.shape, trues.shape)
-        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
-        trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])[:,:,-1]
+        trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])[:,:,-1]
+        preds=np.squeeze(preds,axis=-1)
+        trues=np.squeeze(trues,axis=-1)
 
         mae, mse, rmse, mape, mspe, R2 = metric(preds, trues)
-        print('rmse:{}, mae:{}, R2:{}'.format(rmse, mae,R2))
+        df = pd.DataFrame({
+            'Test MSE': [mse],
+            'Test RMSE': [rmse],
+            'Test MAE': [mae],
+            'Test R2': [R2]
+        })
+        df.to_csv('C:/Users/22279/Desktop/zhibiaoInformer.csv', index=False)
+        print(f"Test MSE: {mse:.4f} | Test RMSE: {rmse:.4f} | Test MAE: {mae:.4f} | Test R2: {R2:.4f}")
 
-        preds=preds.reshape(-1,1)
-        trues=trues.reshape(-1,1)
-
-        #可视化
-        plt.figure()
-        plt.plot(trues,label='True')
-        plt.plot(preds,label='Predict')
-        plt.title('Predict and Actual Values')
-        plt.xlabel('Time')
-        plt.ylabel('Patv')
-        plt.legend()
-        plt.show()
+        preds=self.scaler.inverse_transform(preds)
+        trues=self.scaler.inverse_transform(trues)
+        df = pd.DataFrame({
+            'preds': preds,
+            'trues': trues
+        })
+        df.to_csv('C:/Users/22279/Desktop/Informer.csv', index=False)
 
         return
 
